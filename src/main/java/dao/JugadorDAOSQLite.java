@@ -6,36 +6,45 @@ package dao;
 
 import java.sql.*;
 
+/**
+ *
+ * @author andon
+ */
 public class JugadorDAOSQLite {
-    
+
+    private static String url = "jdbc:sqlite:G:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
+
     public static void main(String[] args) throws SQLException {
-        // Driver 
-		String driver="org.sqlite.JDBC";
-		// Cargar el driver
-		try{
-			Class.forName(driver);
-		}catch(ClassNotFoundException e){
-			System.out.println("Controlador JDBC de SQLite no encontrado: "+e.toString());
-		}
-		// Establecer conexion
-		String url = "jdbc:sqlite:G:\\2DAM\\AD\\dataBase\\SQLite\\datosLocales.db";		//
-		Connection con = DriverManager.getConnection(url);
-		
-		Statement stmt = con.createStatement();
-		String orden = "INSERT INTO jugador VALUES (1,\"HOLA\", 2,3, 4, 5,\"HOY\");";
-		ResultSet rset = stmt.executeQuery(orden);	
-		
-		while (rset.next())	
-			System.out.println(rset.getInt(1)+"\t"+rset.getString(2)+"\t"+rset.getString(3));			
-		
-		// close the result set, the statement and connect
-		rset.close(); stmt.close(); con.close();
-    
-    
-        
+        String driver = "org.sqlite.JDBC";
+        try {
+            Class.forName(driver);
+        } catch (ClassNotFoundException e) {
+            System.out.println("Controlador JDBC de SQLite no encontrado: " + e.toString());
+        }
+
+        // Establecer conexion
+        Connection con = DriverManager.getConnection(url);
+        Statement stmt = con.createStatement();
+        String orden = "INSERT INTO jugador VALUES (2, 'HOLA', 2, 3, 4, 5, 'HOY')";
+
+        // Ejecutar el INSERT con executeUpdate, ya que no devuelve un ResultSet
+        int rowsInserted = stmt.executeUpdate(orden);
+        System.out.println("Filas insertadas: " + rowsInserted);
+
+        stmt.close();
+        con.close();
     }
-    
-    
-    
-    
+
+    public boolean existeJugador(int idJugador) {
+        String sql = "SELECT COUNT(*) FROM jugador WHERE player_id = ?";
+        try (Connection con = DriverManager.getConnection(url); 
+                PreparedStatement pstmt = con.prepareStatement(sql)) {
+            pstmt.setInt(1, idJugador);
+            ResultSet rs = pstmt.executeQuery();
+            return rs.next() && rs.getInt(1) > 0;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
 }

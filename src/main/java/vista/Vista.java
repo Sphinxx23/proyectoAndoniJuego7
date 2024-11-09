@@ -1,16 +1,30 @@
 package vista;
 
+import controlador.*;
 import java.util.Scanner;
+import modelo.Jugador;
 
-public class menuInicio {
+public class Vista {
 
     private static final Scanner sc = new Scanner(System.in);
+    private Jugador j;
+    private int idJugador;
+    private ControladorConfiguracion controlConfig;
+    private ControladorJugador controlJugador;
 
-    public static void main(String[] args) {
-        vistaInicio();
+    public Vista(){
+        j = new Jugador();
     }
-
-    public static void vistaInicio() {
+    
+    public void setControladorConfig(ControladorConfiguracion c) {
+        this.controlConfig = c;
+    }
+    
+    public void setControladorJugador(ControladorJugador c) {
+        this.controlJugador = c;
+    }
+    
+    public void vistaInicio() {
         System.out.println("""
                                     ____  _                           _     _         _
                                    |  _ \\(_)                         (_)   | |       | |
@@ -21,10 +35,10 @@ public class menuInicio {
                                                                                                 """);
         System.out.println();
         System.out.print("Por favor, escribe tu id de jugador para iniciar sesion: ");
-        int idJugador = sc.nextInt();
+        idJugador = sc.nextInt();
 
         //Consultar si el jugador existe en la BD.
-        if (idJugador == 1) {
+        if (controlJugador.verificarExistenciaJugador(idJugador)) {
             vaciarPantalla();
             inicioJugador();
         } else {
@@ -37,7 +51,7 @@ public class menuInicio {
         }
     }
 
-    private static void inicioJugador() {
+    private void inicioJugador() {
         int opJugador;
 
         do {
@@ -110,7 +124,7 @@ public class menuInicio {
         }
     }
 
-    private static void menuConfiguracion() {
+    private void menuConfiguracion() {
         String confSonido, confResolucion, confLenguaje;
         int opConfLenguaje;
 
@@ -118,7 +132,8 @@ public class menuInicio {
         System.out.println("Cambio de configuraciones...");
         System.out.println("###############################");
         System.out.println();
-
+        sc.nextLine();
+        
         System.out.print("¿Desea activar el sonido de los juegos? Si / No: ");
         do {
             confSonido = sc.nextLine();
@@ -131,7 +146,6 @@ public class menuInicio {
 
         System.out.print("Indique la resolucion que quiere aplicar: ");
         confResolucion = sc.nextLine();
-        sc.nextLine();
 
         do {
             System.out.println("###################");
@@ -162,7 +176,7 @@ public class menuInicio {
                 throw new AssertionError();
         }
 
-        aplicarConfiguraciones(confSonido, confResolucion, confLenguaje);
+        aplicarConfiguraciones(idJugador, confSonido, confResolucion, confLenguaje);
     }
 
     private static void menuJuegosEnLinea() {
@@ -181,11 +195,12 @@ public class menuInicio {
         }
     }
 
-    private static void aplicarConfiguraciones(String confSonido, String confResolucion, String confLenguaje) {
+    private void aplicarConfiguraciones(int idJugador, String confSonido, String confResolucion, String confLenguaje) {
         boolean confSonidoBool;
 
         confSonidoBool = confSonido.equals("Si");
-
+        
+        controlConfig.actualizarConfiguracion(idJugador, confSonidoBool, confResolucion, confLenguaje);
         //consulta que modifique la BD para aplicar las configuraciones elegidas por el usuario.
     }
 
@@ -211,6 +226,10 @@ public class menuInicio {
                                                                                            |\\__\\
                                                                                            \\|__|
                                                                                                 """);
+    }
+    
+    public void mensaje(String mensaje){
+        System.out.println(mensaje);
     }
 
 }
