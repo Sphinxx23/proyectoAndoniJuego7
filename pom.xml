@@ -10,5 +10,12 @@
         <maven.compiler.source>20</maven.compiler.source>
         <maven.compiler.target>20</maven.compiler.target>
         <exec.mainClass>modelo.proyectojueguito.ProyectoJueguito</exec.mainClass>
-    </properties>
+    </properties>   
+    <dependencies>
+    <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>42.6.0</version>
+    </dependency>
+</dependencies>
 </project>

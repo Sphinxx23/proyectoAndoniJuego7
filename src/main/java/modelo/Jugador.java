@@ -5,7 +5,6 @@
 package modelo;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
@@ -20,9 +19,9 @@ public class Jugador implements Serializable{
     private int life_level;
     private int coins;
     private int session_count;
-    private LocalDate last_login;
+    private LocalDateTime last_login;
 
-    public Jugador(int user_id, String nick_name ,int experience, int life_level, int coins, int session, LocalDate last_login) {
+    public Jugador(int user_id, String nick_name ,int experience, int life_level, int coins, int session, LocalDateTime last_login) {
         this.user_id = user_id;
         this.nick_name=nick_name;
         this.experience = experience;
@@ -45,11 +44,11 @@ public class Jugador implements Serializable{
         this.session_count = session_count;
     }
 
-    public LocalDate getLast_login() {
+    public LocalDateTime getLast_login() {
         return last_login;
     }
 
-    public void setLast_login(LocalDate last_login) {
+    public void setLast_login(LocalDateTime last_login) {
         this.last_login = last_login;
     }
     

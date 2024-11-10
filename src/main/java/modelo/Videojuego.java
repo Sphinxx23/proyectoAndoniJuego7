@@ -4,20 +4,21 @@
  */
 package modelo;
 
-import java.time.LocalDate;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  *
  * @author Vespertino
  */
-public class Videojuego {
+public class Videojuego implements Serializable{
     private String isbn;
     private String title;
     private int player_count;
     private int total_sessions;
-    private LocalDate last_session;
+    private LocalDateTime last_session;
 
-    public Videojuego(int game_id, String isbn, String title, int player_count, int total_sessions, LocalDate last_session) {
+    public Videojuego(int game_id, String isbn, String title, int player_count, int total_sessions, LocalDateTime last_session) {
         this.isbn = isbn;
         this.title = title;
         this.player_count = player_count;
@@ -61,11 +62,11 @@ public class Videojuego {
         this.total_sessions = total_sessions;
     }
 
-    public LocalDate getLast_session() {
+    public LocalDateTime getLast_session() {
         return last_session;
     }
 
-    public void setLast_session(LocalDate last_session) {
+    public void setLast_session(LocalDateTime last_session) {
         this.last_session = last_session;
     }
     
