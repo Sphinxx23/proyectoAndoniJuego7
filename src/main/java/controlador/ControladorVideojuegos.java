@@ -36,4 +36,8 @@ public class ControladorVideojuegos {
         }
         return listaJuegos;
     }
+
+    public List<Integer> simularPartida() {
+        return videojuegoDAO.simularPartida();
+    }
 }
