@@ -1,6 +1,9 @@
 package vista;
 
+import controlador.ControladorVideojuegos;
 import controlador.*;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Scanner;
 import modelo.Jugador;
 
@@ -8,22 +11,27 @@ public class Vista {
 
     private static final Scanner sc = new Scanner(System.in);
     private Jugador j;
-    private int idJugador;
+    private int idJugador, opJuegosConex, servidorLinea;
     private ControladorConfiguracion controlConfig;
     private ControladorJugador controlJugador;
+    private ControladorVideojuegos controlJuegos;
 
-    public Vista(){
+    public Vista() {
         j = new Jugador();
     }
-    
+
     public void setControladorConfig(ControladorConfiguracion c) {
         this.controlConfig = c;
     }
-    
+
     public void setControladorJugador(ControladorJugador c) {
         this.controlJugador = c;
     }
     
+    public void setControladorJuegos(ControladorVideojuegos c) {
+        this.controlJuegos = c;
+    }
+
     public void vistaInicio() {
         System.out.println("""
                                     ____  _                           _     _         _
@@ -34,21 +42,21 @@ public class Vista {
                                    |____/|_|\\___|_| |_|\\_/ \\___|_| |_|_|\\__,_|\\___/  (_)
                                                                                                 """);
         System.out.println();
-        System.out.print("Por favor, escribe tu id de jugador para iniciar sesion: ");
-        idJugador = sc.nextInt();
+
+        menuJuegos();
 
         //Consultar si el jugador existe en la BD.
-        if (controlJugador.verificarExistenciaJugador(idJugador)) {
-            vaciarPantalla();
-            inicioJugador();
-        } else {
-            vaciarPantalla();
-            System.out.println("##################################################################");
-            System.out.println("Error, ese id no esta registrado, contacte con el administrador.");
-            System.out.println("##################################################################");
-            System.out.println();
-            vistaInicio();
-        }
+//        if (controlJugador.verificarExistenciaJugador(idJugador)) {
+//            vaciarPantalla();
+//            inicioJugador();
+//        } else {
+//            vaciarPantalla();
+//            System.out.println("##################################################################");
+//            System.out.println("Error, ese id no esta registrado, contacte con el administrador.");
+//            System.out.println("##################################################################");
+//            System.out.println();
+//            vistaInicio();
+//        }
     }
 
     private void inicioJugador() {
@@ -61,7 +69,7 @@ public class Vista {
             System.out.println("2. Configuracion");
             System.out.println("3. Salir");
             System.out.println("####################");
-            
+
             System.out.print("Indique una opcion: ");
             opJugador = sc.nextInt();
 
@@ -74,7 +82,7 @@ public class Vista {
         switch (opJugador) {
             case 1:
                 vaciarPantalla();
-                menuJuegos();
+                eligeJugador();
                 break;
             case 2:
                 vaciarPantalla();
@@ -90,8 +98,7 @@ public class Vista {
         }
     }
 
-    private static void menuJuegos() {
-        int opJuegos;
+    private void menuJuegos() {
 
         do {
             System.out.println("#########################################");
@@ -101,19 +108,21 @@ public class Vista {
             System.out.println("#########################################");
             System.out.println();
             System.out.print("Indique la opcion: ");
-            
-            opJuegos = sc.nextInt();
 
-            if (opJuegos < 1 || opJuegos > 2) {
+            opJuegosConex = sc.nextInt();
+
+            if (opJuegosConex < 1 || opJuegosConex > 2) {
                 System.out.println("Opcion incorrecta.");
                 System.out.println();
             }
-        } while (opJuegos < 1 || opJuegos > 2);
+        } while (opJuegosConex < 1 || opJuegosConex > 2);
 
-        switch (opJuegos) {
+        switch (opJuegosConex) {
             case 1:
                 vaciarPantalla();
-                menuJuegosEnLinea();
+                eligeServidorLinea();
+                vaciarPantalla();
+                inicioJugador();
                 break;
             case 2:
                 vaciarPantalla();
@@ -124,6 +133,8 @@ public class Vista {
         }
     }
 
+    //Que el menu de configuracion pueda ver las configuraciones que tiene ya el usuario y pueda
+    // cambiarlas si selecciona una opcion.
     private void menuConfiguracion() {
         String confSonido, confResolucion, confLenguaje;
         int opConfLenguaje;
@@ -133,7 +144,7 @@ public class Vista {
         System.out.println("###############################");
         System.out.println();
         sc.nextLine();
-        
+
         System.out.print("¿Desea activar el sonido de los juegos? Si / No: ");
         do {
             confSonido = sc.nextLine();
@@ -199,9 +210,8 @@ public class Vista {
         boolean confSonidoBool;
 
         confSonidoBool = confSonido.equals("Si");
-        
+
         controlConfig.actualizarConfiguracion(idJugador, confSonidoBool, confResolucion, confLenguaje);
-        //consulta que modifique la BD para aplicar las configuraciones elegidas por el usuario.
     }
 
     private static void mensajeSalida() {
@@ -227,9 +237,114 @@ public class Vista {
                                                                                            \\|__|
                                                                                                 """);
     }
-    
-    public void mensaje(String mensaje){
+
+    public void mensaje(String mensaje) {
         System.out.println(mensaje);
     }
+
+    private void eligeServidorLinea() {
+
+        do {
+            System.out.println("####################");
+            System.out.println("Elige el servidor:");
+            System.out.println("1. PostgreSQL");
+            System.out.println("2. MySQL");
+            System.out.println("####################");
+
+            servidorLinea = sc.nextInt();
+
+            if (servidorLinea < 1 || servidorLinea > 2) {
+                System.out.println("Opcion incorrecta.");
+                System.out.println();
+            }
+        } while (servidorLinea < 1 || servidorLinea > 2);
+
+    }
+
+    private void eligeJugador() {
+        Scanner sc = new Scanner(System.in);
+        boolean existeNombreJugador;
+        List<String> listaJugadores = new LinkedList();
+
+        listaJugadores = controlJugador.obtenerJugadores(servidorLinea);
+
+        if (mostrarJugadores(listaJugadores)) {
+            do {
+                
+                System.out.print("Escribe el nombre del jugador que quieres usar: ");
+                String nombreJugador = sc.nextLine();
+
+                existeNombreJugador = comprobarNombreJugador(nombreJugador, servidorLinea);
+
+                // Si existe enseñar los juegos que puede jugar y si no repetir la solicitud del nombre del jugador.
+                if (existeNombreJugador) {
+                    vaciarPantalla();
+                    mostrarJuegosServidor();
+                } else {
+                    System.out.println("No existe ese nombre de jugador.");
+                    vaciarPantalla();
+                }
+            } while (!existeNombreJugador);
+        } else {
+            inicioJugador();
+        }
+
+    }
+
+    private boolean mostrarJugadores(List<String> listaJugadores) {
+        if (listaJugadores == null) {
+            vaciarPantalla();
+            System.out.println("No hay jugadores.");
+            return false;
+        } else {
+            System.out.println("""
+                                  __     __  __     ______     ______     _____     ______     ______     ______     ______    
+                                 /\\ \\   /\\ \\/\\ \\   /\\  ___\\   /\\  __ \\   /\\  __-.  /\\  __ \\   /\\  == \\   /\\  ___\\   /\\  ___\\   
+                                _\\_\\ \\  \\ \\ \\_\\ \\  \\ \\ \\__ \\  \\ \\  __ \\  \\ \\ \\/\\ \\ \\ \\ \\/\\ \\  \\ \\  __<   \\ \\  __\\   \\ \\___  \\  
+                               /\\_____\\  \\ \\_____\\  \\ \\_____\\  \\ \\_\\ \\_\\  \\ \\____-  \\ \\_____\\  \\ \\_\\ \\_\\  \\ \\_____\\  \\/\\_____\\ 
+                               \\/_____/   \\/_____/   \\/_____/   \\/_/\\/_/   \\/____/   \\/_____/   \\/_/ /_/   \\/_____/   \\/_____/ 
+                                                                                                                               """);
+            System.out.println("#######################################################");
+            System.out.println(String.format("%-15s %-12s %-15s %-6s", "Nombre", "Experiencia", "Nivel de vida", "Monedas"));
+            for (String jugador : listaJugadores) {
+                System.out.println(jugador);
+            }
+            System.out.println("#######################################################");
+            return true;
+        }
+    }
+
+    private boolean comprobarNombreJugador(String nombreJugador, int servidor) {
+        return controlJugador.comprobarNombreJugador(nombreJugador, servidor);
+    }
+
+    private boolean mostrarJuegosServidor() {
+        List<String> listaJuegos = new LinkedList();
+        
+        listaJuegos = controlJuegos.obtenerJuegos(servidorLinea);
+
+        if (listaJuegos == null) {
+            vaciarPantalla();
+            System.out.println("No hay juegos.");
+            return false;
+        } else {
+            System.out.println("""
+                                  __     __  __     ______     ______     ______     ______    
+                                 /\\ \\   /\\ \\/\\ \\   /\\  ___\\   /\\  ___\\   /\\  __ \\   /\\  ___\\   
+                                _\\_\\ \\  \\ \\ \\_\\ \\  \\ \\  __\\   \\ \\ \\__ \\  \\ \\ \\/\\ \\  \\ \\___  \\  
+                               /\\_____\\  \\ \\_____\\  \\ \\_____\\  \\ \\_____\\  \\ \\_____\\  \\/\\_____\\ 
+                               \\/_____/   \\/_____/   \\/_____/   \\/_____/   \\/_____/   \\/_____/ 
+                                                                                               """);
+            System.out.println("#######################################################");
+            System.out.println(String.format("%-15s %-12s", "ISBN", "Nombre Juego"));
+            for (String juego : listaJuegos) {
+                System.out.println(juego);
+            }
+            System.out.println("#######################################################");
+            return true;
+        }
+    }
+
+    
 
 }

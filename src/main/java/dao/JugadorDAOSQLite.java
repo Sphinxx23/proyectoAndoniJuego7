@@ -5,6 +5,8 @@
 package dao;
 
 import java.sql.*;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  *
@@ -46,5 +48,11 @@ public class JugadorDAOSQLite {
             System.out.println(e.getMessage());
             return false;
         }
+    }
+    
+    public List<String> obtenerJugadores(){
+        List<String> jugadores = new LinkedList();
+        
+        return jugadores;
     }
 }

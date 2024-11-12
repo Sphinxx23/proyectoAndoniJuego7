@@ -4,7 +4,10 @@
  */
 package controlador;
 
+import dao.JugadorDAOPostgreeSQL;
 import dao.JugadorDAOSQLite;
+import java.util.LinkedList;
+import java.util.List;
 import vista.Vista;
 
 /**
@@ -13,18 +16,45 @@ import vista.Vista;
  */
 public class ControladorJugador {
 
-    private JugadorDAOSQLite jugador;
+    private JugadorDAOSQLite jugadorSQLite;
+    private JugadorDAOPostgreeSQL jugadorPostgreeSQL;
     private Vista vista;
 
     public ControladorJugador(Vista vista) {
         this.vista = vista;
     }
     
-    public void setModelo(JugadorDAOSQLite modelo) {
-        this.jugador = modelo;
+    public void setModeloSQLite(JugadorDAOSQLite modelo) {
+        this.jugadorSQLite = modelo;
     }
 
+    public void setModeloPostgreeSQL(JugadorDAOPostgreeSQL modelo) {
+        this.jugadorPostgreeSQL = modelo;
+    }
+    
     public boolean verificarExistenciaJugador(int idJugador) {
-        return jugador.existeJugador(idJugador);
+        return jugadorSQLite.existeJugador(idJugador);
+    }
+    
+    public List<String> obtenerJugadores(int servidor){
+        List<String> listaJugadores = new LinkedList();
+        
+        if (servidor == 1) {
+            listaJugadores = JugadorDAOPostgreeSQL.obtenerJugadores();
+        }else{
+            //listaJugadores = MYSQL
+        }
+        return listaJugadores;
+    }
+
+    public boolean comprobarNombreJugador(String nombreJugador, int servidor) {
+
+        if (servidor==1) {
+            //PostgreSQL
+            return jugadorPostgreeSQL.comprobarNombreJugador(nombreJugador);
+        }else{
+            //MySQL
+            return false;
+        }
     }
 }
