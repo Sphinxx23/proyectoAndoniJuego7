@@ -31,12 +31,12 @@ public class ControladorPartida {
         return partidaDAOPostgre.simularPartida();
     }
 
-    public boolean actualizarDatosPartida(List<Integer> cambiosPartidaJugada, int servidorLinea, int idJugadorJuego, String isbnJuego) {
+    public boolean crearPartidaSimulada(List<Integer> cambiosPartidaJugada, int servidorLinea, int idJugadorJuego, String isbnJuego) {
         switch (servidorLinea) {
             case 1:
                 //Postgre
-                PartidaDAOPostgre partidaActualizada = new PartidaDAOPostgre(isbnJuego, idJugadorJuego, cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2), LocalDateTime.now());
-                return partidaDAOPostgre.actualizarDatosPartida(partidaActualizada);
+                PartidaDAOPostgre partida = new PartidaDAOPostgre(isbnJuego, idJugadorJuego, cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2), LocalDateTime.now());
+                return partidaDAOPostgre.crearPartida(partida);
             case 2:
                 //MySQL
                 return false;

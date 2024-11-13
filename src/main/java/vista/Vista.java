@@ -55,7 +55,9 @@ public class Vista {
     private void menuEnLinea() {
         int opJugador;
 
+        
         do {
+            System.out.println("Menu en linea: ");
             System.out.println("####################");
             System.out.println("Elige una opcion: ");
             System.out.println("1. Jugar a un juego");
@@ -78,8 +80,7 @@ public class Vista {
                 break;
             case 2:
                 vaciarPantalla();
-                mensajeSalida();
-                System.exit(0);
+                menuServidores();
                 break;
             default:
                 throw new AssertionError();
@@ -308,10 +309,9 @@ public class Vista {
                     vaciarPantalla();
                     mostrarJuegosServidor();
                     elegirJuego(idJugadorJuego);
-                    
+
                 } else {
                     System.out.println("No existe ese nombre de jugador.");
-                    vaciarPantalla();
                 }
             } while (!existeIDJugador);
         } else {
@@ -380,10 +380,20 @@ public class Vista {
 
     private void elegirJuego(int idJugadorJuego) {
         Scanner sc = new Scanner(System.in);
-
+        boolean existeJuego;
+        String isbnJuego;
         //COMPROBAR QUE EL JUEGO EXISTE
-        System.out.print("Escribe el isbn del juego que quieres jugar: ");
-        String isbnJuego = sc.nextLine();
+        do {
+            System.out.print("Escribe el isbn del juego que quieres jugar: ");
+            isbnJuego = sc.nextLine();
+
+            existeJuego = comprobarJuego(isbnJuego);
+
+            if (!existeJuego) {
+                System.out.println("El juego indicado no existe.");
+            }
+
+        } while (!existeJuego);
 
         simularPartida(isbnJuego, idJugadorJuego);
     }
@@ -400,16 +410,28 @@ public class Vista {
         mostrarMensajePartidaSimulada(cambiosPartidaJugada);
         mostrarDatosPartidaSimulada(cambiosPartidaJugada);
 
-        if (actualizarDatosPartidaSimulada(cambiosPartidaJugada, idJugadorJuego, isbnJuego)) {
+        if (crearPartidaSimulada(cambiosPartidaJugada, idJugadorJuego, isbnJuego)) {
             System.out.println("La partida se ha actualizado correctamente.");
         } else {
             System.out.println("La partida no se ha podido actualizar correctamente.");
         }
-        
+
         if (actualizarDatosJugadorSimulada(cambiosPartidaJugada, idJugadorJuego)) {
             System.out.println("Los datos del jugador se han actualizado correctamente.");
-        }else{
+        } else {
             System.out.println("Los datos del jugador no se han podido actualizar.");
+        }
+
+        if (actualizarVideojuego(isbnJuego, idJugadorJuego)) {
+            System.out.println("Los datos del juego se ha actualizado.");
+        } else {
+            System.out.println("Los datos del juego no se ha podido actualizar.");
+        }
+
+        if (servidorLinea == 1 || servidorLinea == 2) {
+            menuEnLinea();
+        } else {
+            menuSinConexion();
         }
 
     }
@@ -486,12 +508,20 @@ public class Vista {
         System.out.println("====================================");
     }
 
-    private boolean actualizarDatosPartidaSimulada(List<Integer> cambiosPartidaJugada, int idJugadorJuego, String isbnJuego) {
-        return controlPartida.actualizarDatosPartida(cambiosPartidaJugada, servidorLinea, idJugadorJuego, isbnJuego);
+    private boolean crearPartidaSimulada(List<Integer> cambiosPartidaJugada, int idJugadorJuego, String isbnJuego) {
+        return controlPartida.crearPartidaSimulada(cambiosPartidaJugada, servidorLinea, idJugadorJuego, isbnJuego);
     }
 
     private boolean actualizarDatosJugadorSimulada(List<Integer> cambiosPartidaJugada, int idJugadorJuego) {
         return controlJugador.actualizarDatosJugador(cambiosPartidaJugada, idJugadorJuego, servidorLinea);
+    }
+
+    private boolean actualizarVideojuego(String isbnJuego, int idJugador) {
+        return controlJuegos.actualizarVideojuego(isbnJuego, servidorLinea, idJugador);
+    }
+
+    private boolean comprobarJuego(String isbnJuego) {
+        return controlJuegos.comprobarJuego(isbnJuego, servidorLinea);
     }
 
 }

@@ -37,4 +37,33 @@ public class ControladorVideojuegos {
         return listaJuegos;
     }
 
+    public boolean actualizarVideojuego(String isbnJuego, int servidor, int idJugador) {
+        switch (servidor) {
+            case 1:
+                //Postgre
+                return videojuegoDAO.actualizarVidejuego(isbnJuego, idJugador);
+            case 2:
+                //MySQL
+                return false;
+            case 3:
+                //SQLite
+                return false;
+            default:
+                throw new AssertionError();
+        }
+    }
+
+    public boolean comprobarJuego(String isbnJuego, int servidorLinea) {
+        switch (servidorLinea) {
+            case 1:
+                return videojuegoDAO.comprobarJuego(isbnJuego);
+            case 2:
+                return false;
+            case 3:
+                return false;
+            default:
+                throw new AssertionError();
+        }
+    }
+
 }

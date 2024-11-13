@@ -102,29 +102,24 @@ public class PartidaDAOPostgre {
         return cambiosPartidaSimulada;
     }
 
-    public boolean actualizarDatosPartida(PartidaDAOPostgre partidaActualizada) {
-        // Valores a actualizar
-        int experienceN = partidaActualizada.getExperience();
-        int lifeLevel = partidaActualizada.getLife_level();
-        int coinsN = partidaActualizada.getCoins();
-        String isbnN = partidaActualizada.getIsbn();
-        int idJugador = partidaActualizada.getUser_id();
+    public boolean crearPartida(PartidaDAOPostgre partidaActualizada) {
+        LocalDateTime session_date = LocalDateTime.now();
 
-        String consulta = "UPDATE partida SET experience = ?, life_level = ?, coins = ? WHERE user_id = ? AND isbn = ?";
+        String sql = "INSERT INTO partida (isbn, user_id, experience, life_level, coins, session_date) VALUES (?, ?, ?, ?, ?, ?)";
 
-        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(consulta)) {
+        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); 
+                PreparedStatement statement = conexion.prepareStatement(sql)) {
 
-            // Establecer los valores en el PreparedStatement
-            statement.setInt(1, experienceN);
-            statement.setInt(2, lifeLevel);
-            statement.setInt(3, coinsN);
-            statement.setInt(4, idJugador);
-            statement.setString(5, isbnN);
+            statement.setString(1, partidaActualizada.getIsbn());
+            statement.setInt(2, partidaActualizada.getUser_id());
+            statement.setInt(3, partidaActualizada.getExperience());
+            statement.setInt(4, partidaActualizada.getLife_level());
+            statement.setInt(5, partidaActualizada.getCoins());
+            statement.setString(6, session_date.toString());
 
-            // Ejecutar la consulta de actualización
-            int rowsUpdated = statement.executeUpdate();
-            return rowsUpdated > 0; // Devuelve true si se actualizó alguna fila
+            int lineasCambiadas = statement.executeUpdate();
 
+            return lineasCambiadas > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false; // Devuelve false si ocurre algún error
