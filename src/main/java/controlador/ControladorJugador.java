@@ -23,7 +23,7 @@ public class ControladorJugador {
     public ControladorJugador(Vista vista) {
         this.vista = vista;
     }
-    
+
     public void setModeloSQLite(JugadorDAOSQLite modelo) {
         this.jugadorSQLite = modelo;
     }
@@ -31,30 +31,47 @@ public class ControladorJugador {
     public void setModeloPostgreeSQL(JugadorDAOPostgreeSQL modelo) {
         this.jugadorPostgreeSQL = modelo;
     }
-    
+
     public boolean verificarExistenciaJugador(int idJugador) {
         return jugadorSQLite.existeJugador(idJugador);
     }
-    
-    public List<String> obtenerJugadores(int servidor){
+
+    public List<String> obtenerJugadores(int servidor) {
         List<String> listaJugadores = new LinkedList();
-        
+
         if (servidor == 1) {
             listaJugadores = JugadorDAOPostgreeSQL.obtenerJugadores();
-        }else{
+        } else {
             //listaJugadores = MYSQL
         }
         return listaJugadores;
     }
 
-    public boolean comprobarNombreJugador(String nombreJugador, int servidor) {
+    public boolean comprobarIDJugador(int idJugadorJuego, int servidor) {
 
-        if (servidor==1) {
+        if (servidor == 1) {
             //PostgreSQL
-            return jugadorPostgreeSQL.comprobarNombreJugador(nombreJugador);
-        }else{
+            return jugadorPostgreeSQL.comprobarIDJugador(idJugadorJuego);
+        } else {
             //MySQL
             return false;
+        }
+    }
+
+    public boolean actualizarDatosJugador(List<Integer> cambiosPartidaJugada, int idJugadorJuego, int servidor) {
+        switch (servidor) {
+            case 1:
+                //Postgre
+                JugadorDAOPostgreeSQL jugadorPostgreeSQL = new JugadorDAOPostgreeSQL(idJugadorJuego, cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2), "");
+                return jugadorPostgreeSQL.actualizarDatosJugador(jugadorPostgreeSQL);
+            case 2:
+                //MySQL
+                return false;
+            case 3:
+                //SQLite
+                return false;
+            default:
+                return false;
         }
     }
 }

@@ -63,21 +63,5 @@ public class VideojuegoDAO {
         return String.format("%-15s %-12s", isbn, nombreJuego);
     }
 
-    public List<Integer> simularPartida() {
-        int experience, life_level, coins;
-        List<Integer> cambiosPartidaSimulada = new LinkedList<>();
-        Random random = new Random();
-
-        // Generar valores aleatorios para la partida
-        experience = random.nextInt(101); // Experiencia entre 0 y 100
-        life_level = random.nextInt(101); // Nivel de vida entre 0 y 100
-        coins = random.nextInt(201);      // Monedas entre 0 y 200
-
-        // Agregar los valores generados a la lista
-        cambiosPartidaSimulada.add(experience);
-        cambiosPartidaSimulada.add(life_level);
-        cambiosPartidaSimulada.add(coins);
-
-        return cambiosPartidaSimulada;
-    }
+    
 }

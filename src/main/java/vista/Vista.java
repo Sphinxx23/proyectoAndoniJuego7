@@ -16,6 +16,7 @@ public class Vista {
     private ControladorConfiguracion controlConfig;
     private ControladorJugador controlJugador;
     private ControladorVideojuegos controlJuegos;
+    private ControladorPartida controlPartida;
 
     public Vista() {
         j = new Jugador();
@@ -31,6 +32,10 @@ public class Vista {
 
     public void setControladorJuegos(ControladorVideojuegos c) {
         this.controlJuegos = c;
+    }
+
+    public void setControladorPartidas(ControladorPartida c) {
+        this.controlPartida = c;
     }
 
     public void vistaInicio() {
@@ -285,7 +290,7 @@ public class Vista {
 
     private void eligeJugador() {
         Scanner sc = new Scanner(System.in);
-        boolean existeNombreJugador;
+        boolean existeIDJugador;
         List<String> listaJugadores = new LinkedList();
 
         listaJugadores = controlJugador.obtenerJugadores(servidorLinea);
@@ -293,21 +298,22 @@ public class Vista {
         if (mostrarJugadores(listaJugadores)) {
             do {
 
-                System.out.print("Escribe el nombre del jugador que quieres usar: ");
-                String nombreJugador = sc.nextLine();
+                System.out.print("Escribe el id del jugador que quieres usar: ");
+                int idJugadorJuego = sc.nextInt();
 
-                existeNombreJugador = comprobarNombreJugador(nombreJugador, servidorLinea);
+                existeIDJugador = comprobarIDJugador(idJugadorJuego, servidorLinea);
 
                 // Si existe enseñar los juegos que puede jugar y si no repetir la solicitud del nombre del jugador.
-                if (existeNombreJugador) {
+                if (existeIDJugador) {
                     vaciarPantalla();
                     mostrarJuegosServidor();
-                    elegirJuego();
+                    elegirJuego(idJugadorJuego);
+                    
                 } else {
                     System.out.println("No existe ese nombre de jugador.");
                     vaciarPantalla();
                 }
-            } while (!existeNombreJugador);
+            } while (!existeIDJugador);
         } else {
             menuEnLinea();
         }
@@ -328,7 +334,7 @@ public class Vista {
                                \\/_____/   \\/_____/   \\/_____/   \\/_/\\/_/   \\/____/   \\/_____/   \\/_/ /_/   \\/_____/   \\/_____/ 
                                                                                                                                """);
             System.out.println("#######################################################");
-            System.out.println(String.format("%-15s %-12s %-15s %-6s", "Nombre", "Experiencia", "Nivel de vida", "Monedas"));
+            System.out.println(String.format("%-6s%-15s %-12s %-15s %-6s", "ID", "Nombre", "Experiencia", "Nivel de vida", "Monedas"));
             for (String jugador : listaJugadores) {
                 System.out.println(jugador);
             }
@@ -337,8 +343,8 @@ public class Vista {
         }
     }
 
-    private boolean comprobarNombreJugador(String nombreJugador, int servidor) {
-        return controlJugador.comprobarNombreJugador(nombreJugador, servidor);
+    private boolean comprobarIDJugador(int idJugadorJuego, int servidor) {
+        return controlJugador.comprobarIDJugador(idJugadorJuego, servidor);
     }
 
     private boolean mostrarJuegosServidor() {
@@ -352,7 +358,6 @@ public class Vista {
             return false;
         } else {
             mostrarJuegos(listaJuegos);
-
             return true;
         }
     }
@@ -373,27 +378,40 @@ public class Vista {
         System.out.println("#######################################################");
     }
 
-    private void elegirJuego() {
+    private void elegirJuego(int idJugadorJuego) {
         Scanner sc = new Scanner(System.in);
 
         //COMPROBAR QUE EL JUEGO EXISTE
         System.out.print("Escribe el isbn del juego que quieres jugar: ");
         String isbnJuego = sc.nextLine();
 
-        simularPartida(isbnJuego);
+        simularPartida(isbnJuego, idJugadorJuego);
     }
 
-    private void simularPartida(String isbnJuego) {
+    private void simularPartida(String isbnJuego, int idJugadorJuego) {
         List<Integer> cambiosPartidaJugada = new LinkedList();
 
         System.out.println("Iniciando el juego...");
 
         cargarBarraJuego();
 
-        cambiosPartidaJugada = controlJuegos.simularPartida();
+        cambiosPartidaJugada = controlPartida.simularPartida();
 
         mostrarMensajePartidaSimulada(cambiosPartidaJugada);
         mostrarDatosPartidaSimulada(cambiosPartidaJugada);
+
+        if (actualizarDatosPartidaSimulada(cambiosPartidaJugada, idJugadorJuego, isbnJuego)) {
+            System.out.println("La partida se ha actualizado correctamente.");
+        } else {
+            System.out.println("La partida no se ha podido actualizar correctamente.");
+        }
+        
+        if (actualizarDatosJugadorSimulada(cambiosPartidaJugada, idJugadorJuego)) {
+            System.out.println("Los datos del jugador se han actualizado correctamente.");
+        }else{
+            System.out.println("Los datos del jugador no se han podido actualizar.");
+        }
+
     }
 
     public static void cargarBarraJuego() {
@@ -431,22 +449,22 @@ public class Vista {
         Random random = new Random();
 
         String[] mensajesPositivo = new String[]{
-            "¡Excelente partida! Sigue así.",
-            "¡Gran desempeño! Te estás superando.",
-            "¡Increíble! Todo salió perfecto."
+            "¡Excelente partida! Sigue asi.",
+            "¡Gran desempeño! Te estas superando.",
+            "¡Increible! Todo salio perfecto."
         };
 
         String[] mensajesNegativo = new String[]{
-            "No fue tu mejor día, pero sigue intentándolo.",
-            "Esta vez no salió como esperabas, aprende y mejora.",
-            "Una partida difícil, pero puedes hacerlo mejor."
+            "No fue tu mejor dia, pero sigue intentandolo.",
+            "Esta vez no salio como esperabas, aprende y mejora.",
+            "Una partida dificil, pero puedes hacerlo mejor."
         };
 
         int experience = cambiosPartidaJugada.get(0);
         int life_level = cambiosPartidaJugada.get(1);
         int coins = cambiosPartidaJugada.get(2);
 
-        int mensaje = random.nextInt(4);
+        int mensaje = random.nextInt(3);
 
         if (experience > 50 && life_level > 50 && coins > 75) {
             System.out.println(mensajesPositivo[mensaje]);
@@ -466,6 +484,14 @@ public class Vista {
         }
 
         System.out.println("====================================");
+    }
+
+    private boolean actualizarDatosPartidaSimulada(List<Integer> cambiosPartidaJugada, int idJugadorJuego, String isbnJuego) {
+        return controlPartida.actualizarDatosPartida(cambiosPartidaJugada, servidorLinea, idJugadorJuego, isbnJuego);
+    }
+
+    private boolean actualizarDatosJugadorSimulada(List<Integer> cambiosPartidaJugada, int idJugadorJuego) {
+        return controlJugador.actualizarDatosJugador(cambiosPartidaJugada, idJugadorJuego, servidorLinea);
     }
 
 }
