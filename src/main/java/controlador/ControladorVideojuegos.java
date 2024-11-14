@@ -4,7 +4,8 @@
  */
 package controlador;
 
-import dao.VideojuegoDAO;
+import dao.VideojuegoDAOSQLite;
+import dao.VideojuegoDAOPostgre;
 import java.util.LinkedList;
 import java.util.List;
 import vista.Vista;
@@ -15,24 +16,35 @@ import vista.Vista;
  */
 public class ControladorVideojuegos {
 
-    VideojuegoDAO videojuegoDAO = new VideojuegoDAO();
+    VideojuegoDAOPostgre videojuegoDAOPostgre = new VideojuegoDAOPostgre();
+    VideojuegoDAOSQLite videojuegoDAOSQlite = new VideojuegoDAOSQLite();
     Vista vista;
 
     public ControladorVideojuegos(Vista vista) {
         this.vista = vista;
     }
 
-    public void setModeloVideoJuego(VideojuegoDAO videojuegoDAO) {
-        this.videojuegoDAO = videojuegoDAO;
+    public void setModeloVideoJuego(VideojuegoDAOPostgre videojuegoDAO) {
+        this.videojuegoDAOPostgre = videojuegoDAO;
     }
 
     public List<String> obtenerJuegos(int servidor) {
         List<String> listaJuegos = new LinkedList();
 
-        if (servidor == 1) {
-            listaJuegos = videojuegoDAO.obtenerJuegos();
-        } else {
-            //listaJugadores = MYSQL
+        switch (servidor) {
+            case 1:
+                //Postgre
+                listaJuegos = videojuegoDAOPostgre.obtenerJuegos();
+                break;
+            case 2:
+                //MySQL
+                //listaJuegos = videojuegoDAOMySQL.obtenerJuegos();
+                break;
+            case 3:
+                listaJuegos = videojuegoDAOSQlite.obtenerJuegos();
+                break;
+            default:
+                throw new AssertionError();
         }
         return listaJuegos;
     }
@@ -41,7 +53,7 @@ public class ControladorVideojuegos {
         switch (servidor) {
             case 1:
                 //Postgre
-                return videojuegoDAO.actualizarVidejuego(isbnJuego, idJugador);
+                return videojuegoDAOPostgre.actualizarVidejuego(isbnJuego, idJugador);
             case 2:
                 //MySQL
                 return false;
@@ -56,10 +68,23 @@ public class ControladorVideojuegos {
     public boolean comprobarJuego(String isbnJuego, int servidorLinea) {
         switch (servidorLinea) {
             case 1:
-                return videojuegoDAO.comprobarJuego(isbnJuego);
+                return videojuegoDAOPostgre.comprobarJuego(isbnJuego);
             case 2:
                 return false;
             case 3:
+                return false;
+            default:
+                throw new AssertionError();
+        }
+    }
+
+    public boolean comprobarJuegoSinDescargar(String isbnJuego, int servidorLinea) {
+        switch (servidorLinea) {
+            case 1:
+                //Postgre
+                return videojuegoDAOPostgre.comprobarJuegoSinDescargar(isbnJuego);
+            case 2:
+                //MySQL
                 return false;
             default:
                 throw new AssertionError();

@@ -5,7 +5,7 @@
 package controlador;
 
 import dao.PartidaDAOPostgre;
-import dao.VideojuegoDAO;
+import dao.VideojuegoDAOPostgre;
 import java.time.LocalDateTime;
 import java.util.List;
 import vista.Vista;

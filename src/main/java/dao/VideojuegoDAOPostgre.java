@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.LinkedList;
@@ -21,19 +22,19 @@ import java.util.logging.Logger;
  *
  * @author andon
  */
-public class VideojuegoDAO {
+public class VideojuegoDAOPostgre {
 
     private String isbn, nombreJuego;
     private static final String URL = "jdbc:postgresql://ep-broad-union-a29uia00.eu-central-1.aws.neon.tech:5432/proyectoJuego?sslmode=require";
     private static final String USER = "proyectoJuego_owner";
     private static final String PASSWORD = "eb4xsQc0ENkU";
 
-    public VideojuegoDAO(String isbn, String nombreJuego) {
+    public VideojuegoDAOPostgre(String isbn, String nombreJuego) {
         this.isbn = isbn;
         this.nombreJuego = nombreJuego;
     }
 
-    public VideojuegoDAO() {
+    public VideojuegoDAOPostgre() {
         this("", "");
     }
 
@@ -48,7 +49,7 @@ public class VideojuegoDAO {
                 String isbn = resultado.getString("isbn");
                 String nombreJuego = resultado.getString("title");
 
-                VideojuegoDAO videojuego = new VideojuegoDAO(isbn, nombreJuego);
+                VideojuegoDAOPostgre videojuego = new VideojuegoDAOPostgre(isbn, nombreJuego);
 
                 String lineaJuego = videojuego.toString();
 
@@ -104,7 +105,7 @@ public class VideojuegoDAO {
                 }
             }
         } catch (SQLException ex) {
-            Logger.getLogger(VideojuegoDAO.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(VideojuegoDAOPostgre.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
         return false;
@@ -175,6 +176,71 @@ public class VideojuegoDAO {
         }
 
         return false;  // El jugador no existe
+    }
+
+    public boolean comprobarJuegoSinDescargar(String isbnJuego) {
+        String urlSQLite = "jdbc:sqlite:G:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
+
+        try (Connection conn = DriverManager.getConnection(urlSQLite)) {
+            conn.setAutoCommit(false); // Desactiva el auto-commit para usar transacciones
+
+            if (isJuegoDescargado(conn, isbnJuego)) {
+                return false; // El juego ya está descargado
+            }
+
+            String tituloJuego = obtenerTituloJuego(isbnJuego);
+            if (tituloJuego != null) {
+                descargarJuego(conn, isbnJuego, tituloJuego);
+                conn.commit(); // Confirmar la transacción
+                return true;
+            } else {
+                System.out.println("Título no encontrado para el ISBN: " + isbnJuego);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return false;
+    }
+
+    private boolean isJuegoDescargado(Connection conn, String isbnJuego) throws SQLException {
+        String query = "SELECT COUNT(*) FROM videojuegos WHERE isbn = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, isbnJuego);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next() && rs.getInt(1) > 0;
+        }
+    }
+
+    private void descargarJuego(Connection conn, String isbnJuego, String tituloJuego) throws SQLException {
+        String insertQuery = "INSERT INTO videojuegos (isbn, title, player_count, total_sessions, last_session) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
+            stmt.setString(1, isbnJuego);
+            stmt.setString(2, tituloJuego);
+            stmt.setInt(3, 0); // player_count inicial
+            stmt.setInt(4, 0); // total_sessions inicial
+            stmt.setString(5, "2024-11-14T00:00:00"); // last_session inicial
+            stmt.executeUpdate();
+            System.out.println("Juego descargado e insertado en la base de datos.");
+        }
+    }
+
+    private String obtenerTituloJuego(String isbnJuego) {
+        String consultaTitulo = "SELECT title FROM videojuego WHERE isbn = ?";
+
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement stmt = conn.prepareStatement(consultaTitulo)) {
+
+            stmt.setString(1, isbnJuego);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getString("title"); // Obtener el título
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

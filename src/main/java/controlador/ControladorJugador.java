@@ -33,28 +33,44 @@ public class ControladorJugador {
     }
 
     public boolean verificarExistenciaJugador(int idJugador) {
-        return jugadorSQLite.existeJugador(idJugador);
+        return jugadorSQLite.comprobarIDJugador(idJugador);
     }
 
     public List<String> obtenerJugadores(int servidor) {
         List<String> listaJugadores = new LinkedList();
 
-        if (servidor == 1) {
-            listaJugadores = JugadorDAOPostgreeSQL.obtenerJugadores();
-        } else {
-            //listaJugadores = MYSQL
+        switch (servidor) {
+            case 1:
+                //Postgre
+                listaJugadores = JugadorDAOPostgreeSQL.obtenerJugadores();
+                break;
+            case 2:
+                //MySQL
+                //listaJugadores = JugadorDAOMySQL.obtenerJugadores();
+                break;
+            case 3:
+                //SQLite
+                listaJugadores = jugadorSQLite.obtenerJugadores();
+                break;
+            default:
+                throw new AssertionError();
         }
         return listaJugadores;
     }
 
     public boolean comprobarIDJugador(int idJugadorJuego, int servidor) {
-
-        if (servidor == 1) {
-            //PostgreSQL
-            return jugadorPostgreeSQL.comprobarIDJugador(idJugadorJuego);
-        } else {
-            //MySQL
-            return false;
+        switch (servidor) {
+            case 1:
+                //PostgreSQL
+                return jugadorPostgreeSQL.comprobarIDJugador(idJugadorJuego);
+            case 2:
+                //MySQL
+                return false;
+            case 3:
+                //SQLite
+                return jugadorSQLite.comprobarIDJugador(idJugadorJuego);
+            default:
+                throw new AssertionError();
         }
     }
 

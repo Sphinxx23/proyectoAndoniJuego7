@@ -55,7 +55,6 @@ public class Vista {
     private void menuEnLinea() {
         int opJugador;
 
-        
         do {
             System.out.println("Menu en linea: ");
             System.out.println("####################");
@@ -114,9 +113,10 @@ public class Vista {
                 menuEnLinea();
                 break;
             case 2:
+                servidorLinea = 3;
                 vaciarPantalla();
                 menuSinConexion();
-                menuJuegosSinConexion();
+                eligeJugador();
                 break;
             default:
                 throw new AssertionError();
@@ -184,6 +184,7 @@ public class Vista {
         int opJugador;
 
         do {
+            System.out.println("Menu sin conexion:");
             System.out.println("####################");
             System.out.println("Elige una opcion: ");
             System.out.println("1. Jugar a un juego");
@@ -211,21 +212,11 @@ public class Vista {
                 break;
             case 3:
                 vaciarPantalla();
-                mensajeSalida();
-                System.exit(0);
+                menuServidores();
                 break;
             default:
                 throw new AssertionError();
         }
-    }
-
-    private static void menuJuegosEnLinea() {
-        //Obtener los juegos de la BD en una lista para asi poder listarlos y proximamente
-        // dar a elegir al usuario y que se realice una consulta para jugar con ese juego.
-    }
-
-    private static void menuJuegosSinConexion() {
-
     }
 
     private static void vaciarPantalla() {
@@ -307,15 +298,26 @@ public class Vista {
                 // Si existe enseñar los juegos que puede jugar y si no repetir la solicitud del nombre del jugador.
                 if (existeIDJugador) {
                     vaciarPantalla();
-                    mostrarJuegosServidor();
-                    elegirJuego(idJugadorJuego);
+                    if (mostrarJuegosServidor()) {
+                        elegirJuego(idJugadorJuego);
+                    }else{
+                        if (servidorLinea==3) {
+                            menuSinConexion();
+                        }else{
+                            menuEnLinea();
+                        }
+                    }
 
                 } else {
                     System.out.println("No existe ese nombre de jugador.");
                 }
             } while (!existeIDJugador);
         } else {
-            menuEnLinea();
+            if (servidorLinea == 3) {
+                menuSinConexion();
+            } else {
+                menuEnLinea();
+            }
         }
 
     }
@@ -354,7 +356,11 @@ public class Vista {
 
         if (listaJuegos == null) {
             vaciarPantalla();
-            System.out.println("No hay juegos.");
+            if (servidorLinea == 3) {
+                System.out.println("No tienes ningun juego descargado.");
+            } else {
+                System.out.println("No hay juegos en el servidor.");
+            }
             return false;
         } else {
             mostrarJuegos(listaJuegos);
@@ -380,7 +386,7 @@ public class Vista {
 
     private void elegirJuego(int idJugadorJuego) {
         Scanner sc = new Scanner(System.in);
-        boolean existeJuego;
+        boolean existeJuego, juegoSinDescargar;
         String isbnJuego;
         //COMPROBAR QUE EL JUEGO EXISTE
         do {
@@ -388,9 +394,15 @@ public class Vista {
             isbnJuego = sc.nextLine();
 
             existeJuego = comprobarJuego(isbnJuego);
-
+            
             if (!existeJuego) {
                 System.out.println("El juego indicado no existe.");
+            }
+            
+            juegoSinDescargar = comprobarJuegoSinDescargar(isbnJuego);
+            
+            if (juegoSinDescargar) {
+                System.out.println("El juego ha sido instalado.");
             }
 
         } while (!existeJuego);
@@ -437,7 +449,7 @@ public class Vista {
     }
 
     public static void cargarBarraJuego() {
-        int total = 50; // Total de caracteres en la barra de progreso
+        int total = 25; // Total de caracteres en la barra de progreso
         System.out.println("Cargando juego...");
 
         for (int i = 0; i <= total; i++) {
@@ -522,6 +534,10 @@ public class Vista {
 
     private boolean comprobarJuego(String isbnJuego) {
         return controlJuegos.comprobarJuego(isbnJuego, servidorLinea);
+    }
+
+    private boolean comprobarJuegoSinDescargar(String isbnJuego) {
+        return controlJuegos.comprobarJuegoSinDescargar(isbnJuego, servidorLinea);
     }
 
 }
