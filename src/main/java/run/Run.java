@@ -8,9 +8,12 @@ import controlador.ControladorConfiguracion;
 import controlador.ControladorJugador;
 import controlador.ControladorPartida;
 import controlador.ControladorVideojuegos;
+import controlador.PartidaDAOSQLite;
 import dao.JugadorDAOPostgreeSQL;
 import dao.JugadorDAOSQLite;
 import dao.PartidaDAOPostgre;
+import dao.VideojuegoDAOPostgre;
+import dao.VideojuegoDAOSQLite;
 import vista.Vista;
 
 /**
@@ -24,6 +27,9 @@ public class Run {
         JugadorDAOSQLite jugadorSQLite = new JugadorDAOSQLite();
         JugadorDAOPostgreeSQL jugadorPost = new JugadorDAOPostgreeSQL();
         PartidaDAOPostgre partidaDAOPost = new PartidaDAOPostgre();
+        PartidaDAOSQLite partidaDAOSQLite = new PartidaDAOSQLite();
+        VideojuegoDAOPostgre videojuegoDAOPostgre = new VideojuegoDAOPostgre();
+        VideojuegoDAOSQLite videojuegoDAOSQLite = new VideojuegoDAOSQLite();
         
         ControladorConfiguracion controlConf = new ControladorConfiguracion(vista);
         ControladorJugador controlJugador = new ControladorJugador(vista);
@@ -34,6 +40,10 @@ public class Run {
         controlJugador.setModeloPostgreeSQL(jugadorPost);
         
         controlPartida.setModeloPartidaPostgre(partidaDAOPost);
+        controlPartida.setModeloPartidaSQLite(partidaDAOSQLite);
+        
+        controlJuegos.setModeloVideojuegoPostgre(videojuegoDAOPostgre);
+        controlJuegos.setModeloVideojuegoSQLite(videojuegoDAOSQLite);
 
         vista.setControladorConfig(controlConf);
         vista.setControladorJugador(controlJugador);

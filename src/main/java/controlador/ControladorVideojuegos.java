@@ -24,8 +24,12 @@ public class ControladorVideojuegos {
         this.vista = vista;
     }
 
-    public void setModeloVideoJuego(VideojuegoDAOPostgre videojuegoDAO) {
-        this.videojuegoDAOPostgre = videojuegoDAO;
+    public void setModeloVideojuegoPostgre(VideojuegoDAOPostgre videojuegoDAOPostgre) {
+        this.videojuegoDAOPostgre = videojuegoDAOPostgre;
+    }
+    
+    public void setModeloVideojuegoSQLite(VideojuegoDAOSQLite videojuegoDAOSQLite) {
+        this.videojuegoDAOSQlite = videojuegoDAOSQLite;
     }
 
     public List<String> obtenerJuegos(int servidor) {
@@ -59,7 +63,7 @@ public class ControladorVideojuegos {
                 return false;
             case 3:
                 //SQLite
-                return false;
+                return videojuegoDAOSQlite.actualizarVidejuego(isbnJuego, idJugador);
             default:
                 throw new AssertionError();
         }
@@ -72,7 +76,7 @@ public class ControladorVideojuegos {
             case 2:
                 return false;
             case 3:
-                return false;
+                return videojuegoDAOSQlite.comprobarJuego(isbnJuego);
             default:
                 throw new AssertionError();
         }

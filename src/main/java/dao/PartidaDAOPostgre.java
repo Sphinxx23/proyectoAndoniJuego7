@@ -102,7 +102,7 @@ public class PartidaDAOPostgre {
         return cambiosPartidaSimulada;
     }
 
-    public boolean crearPartida(PartidaDAOPostgre partidaActualizada) {
+    public boolean crearPartida(PartidaDAOPostgre partidaPostgre) {
         LocalDateTime session_date = LocalDateTime.now();
 
         String sql = "INSERT INTO partida (isbn, user_id, experience, life_level, coins, session_date) VALUES (?, ?, ?, ?, ?, ?)";
@@ -110,12 +110,12 @@ public class PartidaDAOPostgre {
         try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); 
                 PreparedStatement statement = conexion.prepareStatement(sql)) {
 
-            statement.setString(1, partidaActualizada.getIsbn());
-            statement.setInt(2, partidaActualizada.getUser_id());
-            statement.setInt(3, partidaActualizada.getExperience());
-            statement.setInt(4, partidaActualizada.getLife_level());
-            statement.setInt(5, partidaActualizada.getCoins());
-            statement.setString(6, session_date.toString());
+            statement.setString(1, partidaPostgre.getIsbn());
+            statement.setInt(2, partidaPostgre.getUser_id());
+            statement.setInt(3, partidaPostgre.getExperience());
+            statement.setInt(4, partidaPostgre.getLife_level());
+            statement.setInt(5, partidaPostgre.getCoins());
+            statement.setString(6, partidaPostgre.getSession_date().toString());
 
             int lineasCambiadas = statement.executeUpdate();
 

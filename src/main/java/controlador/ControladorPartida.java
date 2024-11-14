@@ -17,6 +17,7 @@ import vista.Vista;
 public class ControladorPartida {
 
     PartidaDAOPostgre partidaDAOPostgre;
+    PartidaDAOSQLite partidaDAOSQLite;
     Vista vista;
 
     public ControladorPartida(Vista vista) {
@@ -25,6 +26,10 @@ public class ControladorPartida {
 
     public void setModeloPartidaPostgre(PartidaDAOPostgre p) {
         this.partidaDAOPostgre = p;
+    }
+    
+    public void setModeloPartidaSQLite(PartidaDAOSQLite p) {
+        this.partidaDAOSQLite = p;
     }
 
     public List<Integer> simularPartida() {
@@ -35,14 +40,15 @@ public class ControladorPartida {
         switch (servidorLinea) {
             case 1:
                 //Postgre
-                PartidaDAOPostgre partida = new PartidaDAOPostgre(isbnJuego, idJugadorJuego, cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2), LocalDateTime.now());
-                return partidaDAOPostgre.crearPartida(partida);
+                PartidaDAOPostgre partidaPostgre = new PartidaDAOPostgre(isbnJuego, idJugadorJuego, cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2), LocalDateTime.now());
+                return partidaDAOPostgre.crearPartida(partidaPostgre);
             case 2:
                 //MySQL
                 return false;
             case 3:
                 //SQLite
-                return false;
+                PartidaDAOSQLite partidaSQLite = new PartidaDAOSQLite(isbnJuego,idJugadorJuego,cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2), LocalDateTime.now());
+                return partidaDAOSQLite.crearPartida(partidaSQLite);
             default:
                 return false;
         }

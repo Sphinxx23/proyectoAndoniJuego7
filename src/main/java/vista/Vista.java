@@ -300,10 +300,10 @@ public class Vista {
                     vaciarPantalla();
                     if (mostrarJuegosServidor()) {
                         elegirJuego(idJugadorJuego);
-                    }else{
-                        if (servidorLinea==3) {
+                    } else {
+                        if (servidorLinea == 3) {
                             menuSinConexion();
-                        }else{
+                        } else {
                             menuEnLinea();
                         }
                     }
@@ -394,15 +394,17 @@ public class Vista {
             isbnJuego = sc.nextLine();
 
             existeJuego = comprobarJuego(isbnJuego);
-            
+
             if (!existeJuego) {
                 System.out.println("El juego indicado no existe.");
             }
-            
-            juegoSinDescargar = comprobarJuegoSinDescargar(isbnJuego);
-            
-            if (juegoSinDescargar) {
-                System.out.println("El juego ha sido instalado.");
+
+            if (servidorLinea != 3) {
+                juegoSinDescargar = comprobarJuegoSinDescargar(isbnJuego);
+
+                if (juegoSinDescargar) {
+                    System.out.println("El juego ha sido instalado.");
+                }
             }
 
         } while (!existeJuego);
@@ -463,7 +465,7 @@ public class Vista {
             for (int j = i; j < total; j++) {
                 barra.append(" "); // Parte restante
             }
-            barra.append("] ").append(i * 2).append("%"); // Porcentaje cargado
+            barra.append("] ").append(i * 4).append("%"); // Porcentaje cargado
 
             // Imprimir la barra
             System.out.println(barra);

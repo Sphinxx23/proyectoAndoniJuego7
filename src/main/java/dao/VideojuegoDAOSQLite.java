@@ -112,7 +112,7 @@ public class VideojuegoDAOSQLite {
     }
 
     private int consultaPlayerCount(String isbn, int idJugador) throws SQLException {
-        String sql = "SELECT COUNT(*) AS count FROM partida WHERE isbn = ? AND user_id = ?";
+        String sql = "SELECT COUNT(*) AS count FROM partidasJugadas WHERE isbn = ? AND player_id = ?";
 
         try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(sql)) {
 

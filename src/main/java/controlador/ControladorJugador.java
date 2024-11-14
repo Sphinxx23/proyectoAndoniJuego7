@@ -85,7 +85,8 @@ public class ControladorJugador {
                 return false;
             case 3:
                 //SQLite
-                return false;
+                JugadorDAOSQLite jugadorDAOSQLite = new JugadorDAOSQLite(idJugadorJuego, "", cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2));
+                return jugadorDAOSQLite.actualizarDatosJugador(jugadorDAOSQLite);
             default:
                 return false;
         }
