@@ -18,10 +18,6 @@ public class PartidaDAOMySQL {
     private static final String URL = "jdbc:postgresql://ep-broad-union-a29uia00.eu-central-1.aws.neon.tech:5432/proyectoJuego?sslmode=require";
     private static final String USER = "proyectoJuego_owner";
     private static final String PASSWORD = "eb4xsQc0ENkU";
-
-    public static boolean crearPartida(PartidaDAOMySQL partidaDAOmySQL) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
     private int user_id, experience, life_level, coins;
     private String isbn;
     private LocalDateTime session_date;
@@ -86,7 +82,7 @@ public class PartidaDAOMySQL {
         this.session_date = session_date;
     }
     
-    public boolean crearPartida(PartidaDAOPostgre partidaPostgre) {
+    public boolean crearPartida(PartidaDAOMySQL partidaDAOMySQL) {
         LocalDateTime session_date = LocalDateTime.now();
 
         String sql = "INSERT INTO partida (isbn, user_id, experience, life_level, coins, session_date) VALUES (?, ?, ?, ?, ?, ?)";
@@ -94,12 +90,12 @@ public class PartidaDAOMySQL {
         try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); 
                 PreparedStatement statement = conexion.prepareStatement(sql)) {
 
-            statement.setString(1, partidaPostgre.getIsbn());
-            statement.setInt(2, partidaPostgre.getUser_id());
-            statement.setInt(3, partidaPostgre.getExperience());
-            statement.setInt(4, partidaPostgre.getLife_level());
-            statement.setInt(5, partidaPostgre.getCoins());
-            statement.setString(6, partidaPostgre.getSession_date().toString());
+            statement.setString(1, partidaDAOMySQL.getIsbn());
+            statement.setInt(2, partidaDAOMySQL.getUser_id());
+            statement.setInt(3, partidaDAOMySQL.getExperience());
+            statement.setInt(4, partidaDAOMySQL.getLife_level());
+            statement.setInt(5, partidaDAOMySQL.getCoins());
+            statement.setString(6, partidaDAOMySQL.getSession_date().toString());
 
             int lineasCambiadas = statement.executeUpdate();
 

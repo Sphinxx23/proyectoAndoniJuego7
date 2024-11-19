@@ -60,7 +60,7 @@ public class ControladorJugador {
         return listaJugadores;
     }
 
-    public boolean comprobarIDJugador(int idJugadorJuego, int servidor) {
+    public boolean comprobarJugador(int idJugadorJuego, String nombreJugador, int servidor) {
         switch (servidor) {
             case 1:
                 //PostgreSQL
@@ -70,7 +70,7 @@ public class ControladorJugador {
                 return jugadorMySQL.comprobarIDJugador(idJugadorJuego);
             case 3:
                 //SQLite
-                return jugadorSQLite.comprobarIDJugador(idJugadorJuego);
+                return jugadorSQLite.comprobarJugador(idJugadorJuego, nombreJugador);
             default:
                 throw new AssertionError();
         }

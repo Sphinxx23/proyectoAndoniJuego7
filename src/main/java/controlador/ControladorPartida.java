@@ -47,7 +47,7 @@ public class ControladorPartida {
             case 2:
                 //MySQL
                 PartidaDAOMySQL partidaDAOmySQL = new PartidaDAOMySQL(isbnJuego, idJugadorJuego, cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2), LocalDateTime.now());
-                return PartidaDAOMySQL.crearPartida(partidaDAOmySQL);
+                return partidaDAOmySQL.crearPartida(partidaDAOmySQL);
             case 3:
                 //SQLite
                 PartidaDAOSQLite partidaSQLite = new PartidaDAOSQLite(isbnJuego,idJugadorJuego,cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2), LocalDateTime.now());

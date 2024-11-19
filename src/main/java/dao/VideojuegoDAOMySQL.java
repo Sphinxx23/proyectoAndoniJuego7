@@ -140,7 +140,7 @@ public class VideojuegoDAOMySQL {
     }
 
     public boolean comprobarJuegoSinDescargar(String isbnJuego) {
-        String urlSQLite = "jdbc:sqlite:G:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
+        String urlSQLite = "jdbc:sqlite:H:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
 
         try (Connection conn = DriverManager.getConnection(urlSQLite)) {
             conn.setAutoCommit(false); // Desactiva el auto-commit para usar transacciones
@@ -278,7 +278,7 @@ public class VideojuegoDAOMySQL {
                 String isbn = resultado.getString("isbn");
                 String nombreJuego = resultado.getString("title");
                 int player_count = resultado.getInt("player_count");
-                int session_count = resultado.getInt("session_count");
+                int session_count = resultado.getInt("total_sessions");
                 String last_session = resultado.getString("last_session");
 
                 VideojuegoDAOMySQL videojuego = new VideojuegoDAOMySQL(isbn, nombreJuego, last_session, player_count, session_count);

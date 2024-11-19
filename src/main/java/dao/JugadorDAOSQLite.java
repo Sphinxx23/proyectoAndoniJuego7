@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class JugadorDAOSQLite {
 
-    private String URL = "jdbc:sqlite:G:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
+    private String URL = "jdbc:sqlite:H:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
     private int player_id, experience, life_level, coins, session_count;
     private String last_login, nick_name;
 
@@ -98,10 +98,11 @@ public class JugadorDAOSQLite {
         this.session_count = session_count;
     }
 
-    public boolean comprobarIDJugador(int idJugador) {
-        String sql = "SELECT COUNT(*) FROM jugador WHERE player_id = ?";
+    public boolean comprobarJugador(int idJugador, String nombreJugador) {
+        String sql = "SELECT COUNT(*) FROM jugador WHERE player_id = ? AND nick_name = ?";
         try (Connection con = DriverManager.getConnection(URL); PreparedStatement pstmt = con.prepareStatement(sql)) {
             pstmt.setInt(1, idJugador);
+            pstmt.setString(2, nombreJugador);
             ResultSet rs = pstmt.executeQuery();
             return rs.next() && rs.getInt(1) > 0;
         } catch (SQLException e) {

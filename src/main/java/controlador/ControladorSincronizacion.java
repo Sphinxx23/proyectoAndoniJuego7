@@ -26,7 +26,7 @@ public class ControladorSincronizacion {
         this.sincDAO = modelo;
     }
 
-    public boolean sincronizarBasesNubeALocal() throws SQLException {
+    public boolean sincronizarBasesNubeALocal() throws SQLException, ClassNotFoundException {
         return sincDAO.sincronizarBasesNubeALocal();
     }
     

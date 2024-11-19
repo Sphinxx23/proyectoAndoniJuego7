@@ -2,14 +2,11 @@ package vista;
 
 import controlador.ControladorVideojuegos;
 import controlador.*;
-import dao.SincronizarDAO;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import modelo.Jugador;
 
 public class Vista {
@@ -47,7 +44,7 @@ public class Vista {
         this.controlSincronizacion = c;
     }
 
-    public void vistaInicio() {
+    public void vistaInicio() throws ClassNotFoundException {
         System.out.println("""
                                     ____  _                           _     _         _
                                    |  _ \\(_)                         (_)   | |       | |
@@ -311,7 +308,8 @@ public class Vista {
 
     private void eligeJugador() {
         Scanner sc = new Scanner(System.in);
-        boolean existeIDJugador, jugadorSinDescargar;
+        boolean existeJugador, jugadorSinDescargar;
+        String nombreJugador = "";
         List<String> listaJugadores = new LinkedList();
 
         listaJugadores = controlJugador.obtenerJugadores(servidorLinea);
@@ -321,8 +319,13 @@ public class Vista {
 
                 System.out.print("Escribe el id del jugador que quieres usar: ");
                 int idJugadorJuego = sc.nextInt();
+                
+                if (servidorLinea == 3) {
+                    System.out.print("Para asegurar, escribe el nombre de usuario: ");
+                    nombreJugador = sc.nextLine();
+                }
 
-                existeIDJugador = comprobarIDJugador(idJugadorJuego);
+                existeJugador = comprobarJugador(idJugadorJuego, nombreJugador);
 
                 if (servidorLinea != 3) {
                     jugadorSinDescargar = comprobarJugadorSinDescargar(idJugadorJuego);
@@ -333,7 +336,7 @@ public class Vista {
                 }
 
                 // Si existe enseñar los juegos que puede jugar y si no repetir la solicitud del nombre del jugador.
-                if (existeIDJugador) {
+                if (existeJugador) {
                     vaciarPantalla();
                     if (mostrarJuegosServidor()) {
                         elegirJuego(idJugadorJuego);
@@ -348,7 +351,7 @@ public class Vista {
                 } else {
                     System.out.println("No existe ese nombre de jugador.");
                 }
-            } while (!existeIDJugador);
+            } while (!existeJugador);
         } else {
             if (servidorLinea == 3) {
                 menuSinConexion();
@@ -382,8 +385,8 @@ public class Vista {
         }
     }
 
-    private boolean comprobarIDJugador(int idJugadorJuego) {
-        return controlJugador.comprobarIDJugador(idJugadorJuego, servidorLinea);
+    private boolean comprobarJugador(int idJugadorJuego, String nombreJugador) {
+        return controlJugador.comprobarJugador(idJugadorJuego, nombreJugador, servidorLinea);
     }
 
     private boolean mostrarJuegosServidor() {
@@ -430,6 +433,7 @@ public class Vista {
             System.out.print("Escribe el isbn del juego que quieres jugar: ");
             isbnJuego = sc.nextLine();
 
+            
             existeJuego = comprobarJuego(isbnJuego);
 
             if (!existeJuego) {
@@ -579,7 +583,7 @@ public class Vista {
         return controlJuegos.comprobarJuegoSinDescargar(isbnJuego, servidorLinea);
     }
 
-    private boolean sincronizacionBasesNubeALocal() {
+    private boolean sincronizacionBasesNubeALocal() throws ClassNotFoundException {
         try {
             return controlSincronizacion.sincronizarBasesNubeALocal();
         } catch (SQLException ex) {

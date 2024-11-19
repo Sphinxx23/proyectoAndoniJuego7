@@ -21,9 +21,9 @@ public class JugadorDAOMySQL {
 
     private int user_id, experience, lifeLevel, coins, session_count;
     private String nickName, last_login;
-    private static final String URL = "jdbc:mysql://localhost:3306/tu_base_de_datos";
-    private static final String USER = "tu_usuario";
-    private static final String PASSWORD = "tu_contraseña";
+    private static final String URL = "jdbc:mysql://192.168.153.128:3306/proyectoJuego";
+    private static final String USER = "usuario";
+    private static final String PASSWORD = "Password_1";
 
     public JugadorDAOMySQL(int user_id, int experience, int lifeLevel, int coins, int session_count, String nickName, String last_login) {
         this.user_id = user_id;
