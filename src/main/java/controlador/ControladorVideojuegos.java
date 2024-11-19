@@ -4,6 +4,7 @@
  */
 package controlador;
 
+import dao.VideojuegoDAOMySQL;
 import dao.VideojuegoDAOSQLite;
 import dao.VideojuegoDAOPostgre;
 import java.util.LinkedList;
@@ -16,8 +17,9 @@ import vista.Vista;
  */
 public class ControladorVideojuegos {
 
-    VideojuegoDAOPostgre videojuegoDAOPostgre = new VideojuegoDAOPostgre();
-    VideojuegoDAOSQLite videojuegoDAOSQlite = new VideojuegoDAOSQLite();
+    VideojuegoDAOPostgre videojuegoDAOPostgre;
+    VideojuegoDAOSQLite videojuegoDAOSQlite ;
+    VideojuegoDAOMySQL videojuegoDAOMySQL;
     Vista vista;
 
     public ControladorVideojuegos(Vista vista) {
@@ -31,6 +33,10 @@ public class ControladorVideojuegos {
     public void setModeloVideojuegoSQLite(VideojuegoDAOSQLite videojuegoDAOSQLite) {
         this.videojuegoDAOSQlite = videojuegoDAOSQLite;
     }
+    
+    public void setModeloVideojuegoMySQL(VideojuegoDAOMySQL videojuegoDAOMySQL) {
+        this.videojuegoDAOMySQL = videojuegoDAOMySQL;
+    }
 
     public List<String> obtenerJuegos(int servidor) {
         List<String> listaJuegos = new LinkedList();
@@ -38,11 +44,11 @@ public class ControladorVideojuegos {
         switch (servidor) {
             case 1:
                 //Postgre
-                listaJuegos = videojuegoDAOPostgre.obtenerJuegos();
+                listaJuegos = videojuegoDAOPostgre.obtenerJuegosString();
                 break;
             case 2:
                 //MySQL
-                //listaJuegos = videojuegoDAOMySQL.obtenerJuegos();
+                listaJuegos = videojuegoDAOMySQL.obtenerJuegosString();
                 break;
             case 3:
                 listaJuegos = videojuegoDAOSQlite.obtenerJuegos();
@@ -60,7 +66,7 @@ public class ControladorVideojuegos {
                 return videojuegoDAOPostgre.actualizarVidejuego(isbnJuego, idJugador);
             case 2:
                 //MySQL
-                return false;
+                return videojuegoDAOMySQL.actualizarVidejuego(isbnJuego, idJugador);
             case 3:
                 //SQLite
                 return videojuegoDAOSQlite.actualizarVidejuego(isbnJuego, idJugador);
@@ -74,7 +80,7 @@ public class ControladorVideojuegos {
             case 1:
                 return videojuegoDAOPostgre.comprobarJuego(isbnJuego);
             case 2:
-                return false;
+                return videojuegoDAOMySQL.comprobarJuego(isbnJuego);
             case 3:
                 return videojuegoDAOSQlite.comprobarJuego(isbnJuego);
             default:
@@ -89,7 +95,7 @@ public class ControladorVideojuegos {
                 return videojuegoDAOPostgre.comprobarJuegoSinDescargar(isbnJuego);
             case 2:
                 //MySQL
-                return false;
+                return videojuegoDAOMySQL.comprobarJuegoSinDescargar(isbnJuego);
             default:
                 throw new AssertionError();
         }

@@ -4,6 +4,7 @@
  */
 package controlador;
 
+import dao.JugadorDAOMySQL;
 import dao.JugadorDAOPostgreeSQL;
 import dao.JugadorDAOSQLite;
 import java.util.LinkedList;
@@ -18,6 +19,7 @@ public class ControladorJugador {
 
     private JugadorDAOSQLite jugadorSQLite;
     private JugadorDAOPostgreeSQL jugadorPostgreeSQL;
+    private JugadorDAOMySQL jugadorMySQL;
     private Vista vista;
 
     public ControladorJugador(Vista vista) {
@@ -32,8 +34,8 @@ public class ControladorJugador {
         this.jugadorPostgreeSQL = modelo;
     }
 
-    public boolean verificarExistenciaJugador(int idJugador) {
-        return jugadorSQLite.comprobarIDJugador(idJugador);
+    public void setModeloMySQL(JugadorDAOMySQL modelo) {
+        this.jugadorMySQL = modelo;
     }
 
     public List<String> obtenerJugadores(int servidor) {
@@ -42,11 +44,11 @@ public class ControladorJugador {
         switch (servidor) {
             case 1:
                 //Postgre
-                listaJugadores = JugadorDAOPostgreeSQL.obtenerJugadores();
+                listaJugadores = JugadorDAOPostgreeSQL.obtenerJugadoresString();
                 break;
             case 2:
                 //MySQL
-                //listaJugadores = JugadorDAOMySQL.obtenerJugadores();
+                listaJugadores = JugadorDAOMySQL.obtenerJugadores();
                 break;
             case 3:
                 //SQLite
@@ -65,7 +67,7 @@ public class ControladorJugador {
                 return jugadorPostgreeSQL.comprobarIDJugador(idJugadorJuego);
             case 2:
                 //MySQL
-                return false;
+                return jugadorMySQL.comprobarIDJugador(idJugadorJuego);
             case 3:
                 //SQLite
                 return jugadorSQLite.comprobarIDJugador(idJugadorJuego);
@@ -82,13 +84,27 @@ public class ControladorJugador {
                 return jugadorPostgreeSQL.actualizarDatosJugador(jugadorPostgreeSQL);
             case 2:
                 //MySQL
-                return false;
+                JugadorDAOMySQL jugadorDAOMySQL = new JugadorDAOMySQL(idJugadorJuego, cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2), "");
+                return jugadorDAOMySQL.actualizarDatosJugador(jugadorDAOMySQL);
             case 3:
                 //SQLite
                 JugadorDAOSQLite jugadorDAOSQLite = new JugadorDAOSQLite(idJugadorJuego, "", cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2));
                 return jugadorDAOSQLite.actualizarDatosJugador(jugadorDAOSQLite);
             default:
                 return false;
+        }
+    }
+
+    public boolean comprobarJugadorDescargado(int idJugadorJuego, int servidorLinea) {
+        switch (servidorLinea) {
+            case 1:
+                //Postgre
+                return jugadorPostgreeSQL.comprobarJugadorDescargado(idJugadorJuego);
+            case 2:
+                //MySQL
+                return jugadorMySQL.comprobarJugadorDescargado(idJugadorJuego);
+            default:
+                throw new AssertionError();
         }
     }
 }

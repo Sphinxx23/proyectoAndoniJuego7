@@ -18,8 +18,18 @@ public class JugadorDAOPostgreeSQL {
     private static final String URL = "jdbc:postgresql://ep-broad-union-a29uia00.eu-central-1.aws.neon.tech:5432/proyectoJuego?sslmode=require";
     private static final String USER = "proyectoJuego_owner";
     private static final String PASSWORD = "eb4xsQc0ENkU";
-    private int user_id, experience, lifeLevel, coins;
-    private String nickName;
+    private int user_id, experience, lifeLevel, coins, session_count;
+    private String nickName, last_login;
+
+    public JugadorDAOPostgreeSQL(int user_id, int experience, int lifeLevel, int coins, int session_count, String nickName, String last_login) {
+        this.user_id = user_id;
+        this.experience = experience;
+        this.lifeLevel = lifeLevel;
+        this.coins = coins;
+        this.session_count = session_count;
+        this.nickName = nickName;
+        this.last_login = last_login;
+    }
 
     public JugadorDAOPostgreeSQL(int user_id, int experience, int lifeLevel, int coins, String nickName) {
         this.user_id = user_id;
@@ -73,7 +83,23 @@ public class JugadorDAOPostgreeSQL {
         this.nickName = nickName;
     }
 
-    public static List<String> obtenerJugadores() {
+    public int getSession_count() {
+        return session_count;
+    }
+
+    public void setSession_count(int session_count) {
+        this.session_count = session_count;
+    }
+
+    public String getLast_login() {
+        return last_login;
+    }
+
+    public void setLast_login(String last_login) {
+        this.last_login = last_login;
+    }
+
+    public static List<String> obtenerJugadoresString() {
         List<String> listaJugadores = new LinkedList();
 
         String consulta = "SELECT user_id, nick_name, experience, life_level, coins FROM jugador ORDER BY user_id";
@@ -92,6 +118,34 @@ public class JugadorDAOPostgreeSQL {
                 String lineaJugador = jugadorPostgree.toString();
 
                 listaJugadores.add(lineaJugador);
+            }
+
+            return listaJugadores;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static List<JugadorDAOPostgreeSQL> obtenerJugadoresObjeto() {
+        List<JugadorDAOPostgreeSQL> listaJugadores = new LinkedList();
+
+        String consulta = "SELECT * FROM jugador";
+
+        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
+
+            while (resultado.next()) {
+                int user_id = resultado.getInt("user_id");
+                String nickName = resultado.getString("nick_name");
+                int experience = resultado.getInt("experience");
+                int lifeLevel = resultado.getInt("life_level");
+                int coins = resultado.getInt("coins");
+                int session_count = resultado.getInt("session_count");
+                String last_login = resultado.getString("last_login");
+
+                JugadorDAOPostgreeSQL jugadorPostgree = new JugadorDAOPostgreeSQL(user_id, experience, lifeLevel, coins, session_count, nickName, last_login);
+
+                listaJugadores.add(jugadorPostgree);
             }
 
             return listaJugadores;
@@ -149,7 +203,7 @@ public class JugadorDAOPostgreeSQL {
             statement.setInt(3, coinsN);
             statement.setString(4, lastLogin.toString());
             statement.setInt(5, idJugador);
-            
+
             // Ejecutar la consulta de actualización
             int rowsUpdated = statement.executeUpdate();
             return rowsUpdated > 0; // Devuelve true si se actualizó alguna fila
@@ -157,6 +211,82 @@ public class JugadorDAOPostgreeSQL {
         } catch (SQLException e) {
             e.printStackTrace();
             return false; // Devuelve false si ocurre algún error
+        }
+    }
+
+    public boolean comprobarJugadorDescargado(int idJugadorJuego) {
+        String urlSQLite = "jdbc:sqlite:G:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
+
+        try (Connection conn = DriverManager.getConnection(urlSQLite)) {
+            conn.setAutoCommit(false); // Desactiva el auto-commit para usar transacciones
+
+            if (isJugadorDescargado(conn, idJugadorJuego)) {
+                return false; // El juego ya está descargado
+            }
+
+            JugadorDAOPostgreeSQL jugador = obtenerJugadorID(idJugadorJuego);
+            if (jugador != null) {
+                descargarJugador(conn, jugador);
+                conn.commit(); // Confirmar la transacción
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean isJugadorDescargado(Connection conn, int idJugadorJuego) throws SQLException {
+        String query = "SELECT COUNT(*) FROM jugador WHERE player_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, idJugadorJuego);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next() && rs.getInt(1) > 0;
+        }
+    }
+
+    private JugadorDAOPostgreeSQL obtenerJugadorID(int idJugadorJuego) {
+        String consulta = "SELECT * FROM jugador where user_id = ?";
+
+        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(consulta)) {
+
+            statement.setInt(1, idJugadorJuego);
+
+            ResultSet resultado = statement.executeQuery();
+
+            while (resultado.next()) {
+                user_id = resultado.getInt("user_id");
+                nickName = resultado.getString("nick_name");
+                experience = resultado.getInt("experience");
+                lifeLevel = resultado.getInt("life_level");
+                coins = resultado.getInt("coins");
+                session_count = resultado.getInt("session_count");
+                last_login = resultado.getString("last_login");
+            }
+
+            JugadorDAOPostgreeSQL jugadorPostgree = new JugadorDAOPostgreeSQL(user_id, experience, lifeLevel, coins, session_count, nickName, last_login);
+            return jugadorPostgree;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private void descargarJugador(Connection conn, JugadorDAOPostgreeSQL jugador) throws SQLException {
+        String insertQuery = "INSERT INTO jugador (player_id, nick_name, experience, life_level, coins, session_count, last_login) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
+            stmt.setInt(1, jugador.getUser_id());
+            stmt.setString(2, jugador.getNickName());
+            stmt.setInt(3, jugador.getExperience()); // player_count inicial
+            stmt.setInt(4, jugador.getLifeLevel()); // total_sessions inicial
+            stmt.setInt(5, jugador.getCoins()); // last_session inicial
+            stmt.setInt(6, jugador.getSession_count()); // last_session inicial
+            stmt.setString(7, jugador.getLast_login()); // last_session inicial
+            stmt.executeUpdate();
+            System.out.println("Juego descargado e insertado en la base de datos.");
         }
     }
 

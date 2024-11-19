@@ -16,7 +16,7 @@ import java.util.List;
 public class JugadorDAOSQLite {
 
     private String URL = "jdbc:sqlite:G:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
-    private int player_id, experience, life_level, coins;
+    private int player_id, experience, life_level, coins, session_count;
     private String last_login, nick_name;
 
     public JugadorDAOSQLite(int player_id, String nick_name, int experience, int life_level, int coins) {
@@ -26,6 +26,16 @@ public class JugadorDAOSQLite {
         this.life_level = life_level;
         this.coins = coins;
         this.last_login = LocalDateTime.now().toString();
+    }
+
+    public JugadorDAOSQLite(int player_id, int experience, int life_level, int coins, int session_count, String last_login, String nick_name) {
+        this.player_id = player_id;
+        this.experience = experience;
+        this.life_level = life_level;
+        this.coins = coins;
+        this.session_count = session_count;
+        this.last_login = last_login;
+        this.nick_name = nick_name;
     }
 
     public JugadorDAOSQLite() {
@@ -79,8 +89,14 @@ public class JugadorDAOSQLite {
     public void setNick_name(String nick_name) {
         this.nick_name = nick_name;
     }
-    
-    
+
+    public int getSession_count() {
+        return session_count;
+    }
+
+    public void setSession_count(int session_count) {
+        this.session_count = session_count;
+    }
 
     public boolean comprobarIDJugador(int idJugador) {
         String sql = "SELECT COUNT(*) FROM jugador WHERE player_id = ?";
@@ -155,6 +171,34 @@ public class JugadorDAOSQLite {
         } catch (SQLException e) {
             e.printStackTrace();
             return false; // Devuelve false si ocurre algún error
+        }
+    }
+
+    public List<JugadorDAOSQLite> obtenerJugadoresObjeto() {
+        List<JugadorDAOSQLite> listaJugadores = new LinkedList();
+
+        String consulta = "SELECT * FROM jugador";
+
+        try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
+
+            while (resultado.next()) {
+                int user_id = resultado.getInt("player_id");
+                String nickName = resultado.getString("nick_name");
+                int experience = resultado.getInt("experience");
+                int lifeLevel = resultado.getInt("life_level");
+                int coins = resultado.getInt("coins");
+                int session_count = resultado.getInt("session_count");
+                String last_login = resultado.getString("last_login");
+
+                JugadorDAOSQLite jugador = new JugadorDAOSQLite(user_id, experience, lifeLevel, coins, session_count, last_login, nickName );
+
+                listaJugadores.add(jugador);
+            }
+
+            return listaJugadores;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 

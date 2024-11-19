@@ -7,11 +7,13 @@ package run;
 import controlador.ControladorConfiguracion;
 import controlador.ControladorJugador;
 import controlador.ControladorPartida;
+import controlador.ControladorSincronizacion;
 import controlador.ControladorVideojuegos;
-import controlador.PartidaDAOSQLite;
+import dao.PartidaDAOSQLite;
 import dao.JugadorDAOPostgreeSQL;
 import dao.JugadorDAOSQLite;
 import dao.PartidaDAOPostgre;
+import dao.SincronizarDAO;
 import dao.VideojuegoDAOPostgre;
 import dao.VideojuegoDAOSQLite;
 import vista.Vista;
@@ -30,12 +32,16 @@ public class Run {
         PartidaDAOSQLite partidaDAOSQLite = new PartidaDAOSQLite();
         VideojuegoDAOPostgre videojuegoDAOPostgre = new VideojuegoDAOPostgre();
         VideojuegoDAOSQLite videojuegoDAOSQLite = new VideojuegoDAOSQLite();
+        SincronizarDAO sincroDAO = new SincronizarDAO();
         
         ControladorConfiguracion controlConf = new ControladorConfiguracion(vista);
         ControladorJugador controlJugador = new ControladorJugador(vista);
         ControladorVideojuegos controlJuegos = new ControladorVideojuegos(vista);
         ControladorPartida controlPartida = new ControladorPartida(vista);
+        ControladorSincronizacion controlSinc = new ControladorSincronizacion(vista);
 
+        controlSinc.setModelo(sincroDAO);
+        
         controlJugador.setModeloSQLite(jugadorSQLite);
         controlJugador.setModeloPostgreeSQL(jugadorPost);
         
@@ -49,6 +55,7 @@ public class Run {
         vista.setControladorJugador(controlJugador);
         vista.setControladorJuegos(controlJuegos);
         vista.setControladorPartidas(controlPartida);
+        vista.setControladorSinc(controlSinc);
 
         vista.vistaInicio();
     }

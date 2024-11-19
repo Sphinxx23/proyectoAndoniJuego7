@@ -21,8 +21,17 @@ import java.util.logging.Logger;
  */
 public class VideojuegoDAOSQLite {
 
-    private String isbn, nombreJuego;
+    private String isbn, nombreJuego, last_session;
+    private int player_count, session_count;
     private static final String URL = "jdbc:sqlite:G:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
+
+    public VideojuegoDAOSQLite(String isbn, String nombreJuego, String last_session, int player_count, int session_count) {
+        this.isbn = isbn;
+        this.nombreJuego = nombreJuego;
+        this.last_session = last_session;
+        this.player_count = player_count;
+        this.session_count = session_count;
+    }
 
     public VideojuegoDAOSQLite(String isbn, String nombreJuego) {
         this.isbn = isbn;
@@ -32,7 +41,47 @@ public class VideojuegoDAOSQLite {
     public VideojuegoDAOSQLite() {
         this("", "");
     }
-    
+
+    public String getIsbn() {
+        return isbn;
+    }
+
+    public void setIsbn(String isbn) {
+        this.isbn = isbn;
+    }
+
+    public String getNombreJuego() {
+        return nombreJuego;
+    }
+
+    public void setNombreJuego(String nombreJuego) {
+        this.nombreJuego = nombreJuego;
+    }
+
+    public String getLast_session() {
+        return last_session;
+    }
+
+    public void setLast_session(String last_session) {
+        this.last_session = last_session;
+    }
+
+    public int getPlayer_count() {
+        return player_count;
+    }
+
+    public void setPlayer_count(int player_count) {
+        this.player_count = player_count;
+    }
+
+    public int getSession_count() {
+        return session_count;
+    }
+
+    public void setSession_count(int session_count) {
+        this.session_count = session_count;
+    }
+
     public static List<String> obtenerJuegos() {
         List<String> listaJugadores = new LinkedList();
 
@@ -44,19 +93,17 @@ public class VideojuegoDAOSQLite {
                 String isbn = resultado.getString("isbn");
                 String nombreJuego = resultado.getString("title");
 
-                VideojuegoDAOSQLite videojuego = new VideojuegoDAOSQLite(isbn, nombreJuego);
-
-                String lineaJuego = videojuego.toString();
+                String lineaJuego = isbn + " - " + nombreJuego;
 
                 listaJugadores.add(lineaJuego);
             }
 
-            if (listaJugadores.size() == 0) {
+            if (listaJugadores.isEmpty()) {
                 return null;
-            }else{
+            } else {
                 return listaJugadores;
             }
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
@@ -177,4 +224,32 @@ public class VideojuegoDAOSQLite {
 
         return false;  // El jugador no existe
     }
+
+    public List<VideojuegoDAOSQLite> obtenerJuegosObjeto() {
+        List<VideojuegoDAOSQLite> listaJuegos = new LinkedList();
+
+        String consulta = "SELECT * FROM videojuegos";
+
+        try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
+
+            while (resultado.next()) {
+                String isbn = resultado.getString("isbn");
+                String nombreJuego = resultado.getString("title");
+                int player_count = resultado.getInt("player_count");
+                int session_count = resultado.getInt("total_sessions");
+                String last_session = resultado.getString("last_session");
+
+                VideojuegoDAOSQLite videojuego = new VideojuegoDAOSQLite(isbn, nombreJuego, last_session, player_count, session_count);
+
+                listaJuegos.add(videojuego);
+            }
+
+            return listaJuegos;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    
 }

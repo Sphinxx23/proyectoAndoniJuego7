@@ -4,6 +4,8 @@
  */
 package controlador;
 
+import dao.PartidaDAOMySQL;
+import dao.PartidaDAOSQLite;
 import dao.PartidaDAOPostgre;
 import dao.VideojuegoDAOPostgre;
 import java.time.LocalDateTime;
@@ -44,7 +46,8 @@ public class ControladorPartida {
                 return partidaDAOPostgre.crearPartida(partidaPostgre);
             case 2:
                 //MySQL
-                return false;
+                PartidaDAOMySQL partidaDAOmySQL = new PartidaDAOMySQL(isbnJuego, idJugadorJuego, cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2), LocalDateTime.now());
+                return PartidaDAOMySQL.crearPartida(partidaDAOmySQL);
             case 3:
                 //SQLite
                 PartidaDAOSQLite partidaSQLite = new PartidaDAOSQLite(isbnJuego,idJugadorJuego,cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2), LocalDateTime.now());

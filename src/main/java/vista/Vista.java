@@ -2,10 +2,14 @@ package vista;
 
 import controlador.ControladorVideojuegos;
 import controlador.*;
+import dao.SincronizarDAO;
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import modelo.Jugador;
 
 public class Vista {
@@ -17,6 +21,7 @@ public class Vista {
     private ControladorJugador controlJugador;
     private ControladorVideojuegos controlJuegos;
     private ControladorPartida controlPartida;
+    private ControladorSincronizacion controlSincronizacion;
 
     public Vista() {
         j = new Jugador();
@@ -38,6 +43,10 @@ public class Vista {
         this.controlPartida = c;
     }
 
+    public void setControladorSinc(ControladorSincronizacion c) {
+        this.controlSincronizacion = c;
+    }
+
     public void vistaInicio() {
         System.out.println("""
                                     ____  _                           _     _         _
@@ -49,7 +58,12 @@ public class Vista {
                                                                                                 """);
         System.out.println();
 
-        menuServidores();
+        if (sincronizacionBasesNubeALocal()) {
+            menuServidores();
+        } else {
+            System.out.println("Los servidores no estan funcionando bien.");
+        }
+
     }
 
     private void menuEnLinea() {
@@ -93,17 +107,18 @@ public class Vista {
             System.out.println("Elige la forma en la que quieres jugar: ");
             System.out.println("1. En linea");
             System.out.println("2. Sin conexion");
+            System.out.println("3. Salir de la aplicacion.");
             System.out.println("#########################################");
             System.out.println();
             System.out.print("Indique la opcion: ");
 
             opJuegosConex = sc.nextInt();
 
-            if (opJuegosConex < 1 || opJuegosConex > 2) {
+            if (opJuegosConex < 1 || opJuegosConex > 3) {
                 System.out.println("Opcion incorrecta.");
                 System.out.println();
             }
-        } while (opJuegosConex < 1 || opJuegosConex > 2);
+        } while (opJuegosConex < 1 || opJuegosConex > 3);
 
         switch (opJuegosConex) {
             case 1:
@@ -117,6 +132,11 @@ public class Vista {
                 vaciarPantalla();
                 menuSinConexion();
                 eligeJugador();
+                break;
+            case 3:
+                vaciarPantalla();
+                guardarCambiosLocalANube();
+                mensajeSalida();
                 break;
             default:
                 throw new AssertionError();
@@ -189,17 +209,18 @@ public class Vista {
             System.out.println("Elige una opcion: ");
             System.out.println("1. Jugar a un juego");
             System.out.println("2. Configuracion");
-            System.out.println("3. Salir");
+            System.out.println("3. Guardar cambios");
+            System.out.println("4. Salir");
             System.out.println("####################");
 
             System.out.print("Indique una opcion: ");
             opJugador = sc.nextInt();
 
-            if (opJugador < 1 || opJugador > 3) {
+            if (opJugador < 1 || opJugador > 4) {
                 System.out.println("Opcion incorrecta.");
                 System.out.println();
             }
-        } while (opJugador < 1 || opJugador > 3);
+        } while (opJugador < 1 || opJugador > 4);
 
         switch (opJugador) {
             case 1:
@@ -211,6 +232,14 @@ public class Vista {
                 menuConfiguracion();
                 break;
             case 3:
+                vaciarPantalla();
+                if (guardarCambiosLocalANube()) {
+                    System.out.println("Cambios guardados correctamente.");
+                } else {
+                    System.out.println("No se han podido guardar los cambios.");
+                }
+                break;
+            case 4:
                 vaciarPantalla();
                 menuServidores();
                 break;
@@ -282,7 +311,7 @@ public class Vista {
 
     private void eligeJugador() {
         Scanner sc = new Scanner(System.in);
-        boolean existeIDJugador;
+        boolean existeIDJugador, jugadorSinDescargar;
         List<String> listaJugadores = new LinkedList();
 
         listaJugadores = controlJugador.obtenerJugadores(servidorLinea);
@@ -293,7 +322,15 @@ public class Vista {
                 System.out.print("Escribe el id del jugador que quieres usar: ");
                 int idJugadorJuego = sc.nextInt();
 
-                existeIDJugador = comprobarIDJugador(idJugadorJuego, servidorLinea);
+                existeIDJugador = comprobarIDJugador(idJugadorJuego);
+
+                if (servidorLinea != 3) {
+                    jugadorSinDescargar = comprobarJugadorSinDescargar(idJugadorJuego);
+
+                    if (jugadorSinDescargar) {
+                        System.out.println("El jugador ha sido descargado en la base de datos local.");
+                    }
+                }
 
                 // Si existe enseñar los juegos que puede jugar y si no repetir la solicitud del nombre del jugador.
                 if (existeIDJugador) {
@@ -323,7 +360,7 @@ public class Vista {
     }
 
     private boolean mostrarJugadores(List<String> listaJugadores) {
-        if (listaJugadores == null) {
+        if (listaJugadores.isEmpty()) {
             vaciarPantalla();
             System.out.println("No hay jugadores.");
             return false;
@@ -345,8 +382,8 @@ public class Vista {
         }
     }
 
-    private boolean comprobarIDJugador(int idJugadorJuego, int servidor) {
-        return controlJugador.comprobarIDJugador(idJugadorJuego, servidor);
+    private boolean comprobarIDJugador(int idJugadorJuego) {
+        return controlJugador.comprobarIDJugador(idJugadorJuego, servidorLinea);
     }
 
     private boolean mostrarJuegosServidor() {
@@ -542,4 +579,23 @@ public class Vista {
         return controlJuegos.comprobarJuegoSinDescargar(isbnJuego, servidorLinea);
     }
 
+    private boolean sincronizacionBasesNubeALocal() {
+        try {
+            return controlSincronizacion.sincronizarBasesNubeALocal();
+        } catch (SQLException ex) {
+            return false;
+        }
+    }
+
+    private boolean comprobarJugadorSinDescargar(int idJugadorJuego) {
+        return controlJugador.comprobarJugadorDescargado(idJugadorJuego, servidorLinea);
+    }
+
+    private boolean guardarCambiosLocalANube() {
+        try {
+            return controlSincronizacion.sincronizarLocalANube();
+        } catch (SQLException ex) {
+            return false;
+        }
+    }
 }

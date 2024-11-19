@@ -24,10 +24,19 @@ import java.util.logging.Logger;
  */
 public class VideojuegoDAOPostgre {
 
-    private String isbn, nombreJuego;
+    private String isbn, nombreJuego, last_session;
+    private int player_count, session_count;
     private static final String URL = "jdbc:postgresql://ep-broad-union-a29uia00.eu-central-1.aws.neon.tech:5432/proyectoJuego?sslmode=require";
     private static final String USER = "proyectoJuego_owner";
     private static final String PASSWORD = "eb4xsQc0ENkU";
+
+    public VideojuegoDAOPostgre(String isbn, String nombreJuego, int player_count, int session_count, String last_session) {
+        this.isbn = isbn;
+        this.nombreJuego = nombreJuego;
+        this.player_count = player_count;
+        this.session_count = session_count;
+        this.last_session = last_session;
+    }
 
     public VideojuegoDAOPostgre(String isbn, String nombreJuego) {
         this.isbn = isbn;
@@ -38,7 +47,73 @@ public class VideojuegoDAOPostgre {
         this("", "");
     }
 
-    public static List<String> obtenerJuegos() {
+    public String getIsbn() {
+        return isbn;
+    }
+
+    public void setIsbn(String isbn) {
+        this.isbn = isbn;
+    }
+
+    public String getNombreJuego() {
+        return nombreJuego;
+    }
+
+    public void setNombreJuego(String nombreJuego) {
+        this.nombreJuego = nombreJuego;
+    }
+
+    public String getLast_session() {
+        return last_session;
+    }
+
+    public void setLast_session(String last_session) {
+        this.last_session = last_session;
+    }
+
+    public int getPlayer_count() {
+        return player_count;
+    }
+
+    public void setPlayer_count(int player_count) {
+        this.player_count = player_count;
+    }
+
+    public int getSession_count() {
+        return session_count;
+    }
+
+    public void setSession_count(int session_count) {
+        this.session_count = session_count;
+    }
+
+    public static List<VideojuegoDAOPostgre> obtenerJuegosObjeto() {
+        List<VideojuegoDAOPostgre> listaJuegos = new LinkedList();
+
+        String consulta = "SELECT * FROM videojuego";
+
+        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
+
+            while (resultado.next()) {
+                String isbn = resultado.getString("isbn");
+                String nombreJuego = resultado.getString("title");
+                int player_count = resultado.getInt("player_count");
+                int session_count = resultado.getInt("total_sessions");
+                String last_session = resultado.getString("last_session");
+
+                VideojuegoDAOPostgre videojuego = new VideojuegoDAOPostgre(isbn, nombreJuego, player_count, session_count, last_session);
+
+                listaJuegos.add(videojuego);
+            }
+
+            return listaJuegos;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static List<String> obtenerJuegosString() {
         List<String> listaJugadores = new LinkedList();
 
         String consulta = "SELECT isbn, title FROM videojuego";
@@ -188,9 +263,9 @@ public class VideojuegoDAOPostgre {
                 return false; // El juego ya está descargado
             }
 
-            String tituloJuego = obtenerTituloJuego(isbnJuego);
-            if (tituloJuego != null) {
-                descargarJuego(conn, isbnJuego, tituloJuego);
+            VideojuegoDAOPostgre juegoPost = obtenerJuegoISBN(isbnJuego);
+            if (juegoPost != null) {
+                descargarJuego(conn, isbnJuego, juegoPost);
                 conn.commit(); // Confirmar la transacción
                 return true;
             } else {
@@ -213,14 +288,14 @@ public class VideojuegoDAOPostgre {
         }
     }
 
-    private void descargarJuego(Connection conn, String isbnJuego, String tituloJuego) throws SQLException {
+    private void descargarJuego(Connection conn, String isbnJuego, VideojuegoDAOPostgre juegoPost) throws SQLException {
         String insertQuery = "INSERT INTO videojuegos (isbn, title, player_count, total_sessions, last_session) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
-            stmt.setString(1, isbnJuego);
-            stmt.setString(2, tituloJuego);
-            stmt.setInt(3, 0); // player_count inicial
-            stmt.setInt(4, 0); // total_sessions inicial
-            stmt.setString(5, "2024-11-14T00:00:00"); // last_session inicial
+            stmt.setString(1, juegoPost.getIsbn());
+            stmt.setString(2, juegoPost.getNombreJuego());
+            stmt.setInt(3, juegoPost.getPlayer_count()); // player_count inicial
+            stmt.setInt(4, juegoPost.getSession_count()); // total_sessions inicial
+            stmt.setString(5, juegoPost.getLast_session()); // last_session inicial
             stmt.executeUpdate();
             System.out.println("Juego descargado e insertado en la base de datos.");
         }
@@ -241,6 +316,32 @@ public class VideojuegoDAOPostgre {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private VideojuegoDAOPostgre obtenerJuegoISBN(String isbnJuego) {
+
+        String consulta = "SELECT * FROM videojuego WHERE isbn = ?";
+
+        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(consulta)) {
+
+            statement.setString(1, isbnJuego);
+
+            ResultSet resultado = statement.executeQuery();
+
+            while (resultado.next()) {
+                isbn = resultado.getString("isbn");
+                nombreJuego = resultado.getString("title");
+                player_count = resultado.getInt("player_count");
+                session_count = resultado.getInt("total_sessions");
+                last_session = resultado.getString("last_session");
+            }
+            
+            VideojuegoDAOPostgre videojuego = new VideojuegoDAOPostgre(isbn, nombreJuego, player_count, session_count, last_session);
+            return videojuego;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }
