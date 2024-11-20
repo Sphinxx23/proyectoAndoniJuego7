@@ -26,7 +26,7 @@ import vista.Vista;
  */
 public class Run {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ClassNotFoundException {
         Vista vista = new Vista();
         JugadorDAOSQLite jugadorSQLite = new JugadorDAOSQLite();
         JugadorDAOPostgreeSQL jugadorPost = new JugadorDAOPostgreeSQL();

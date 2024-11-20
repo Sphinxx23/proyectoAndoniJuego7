@@ -128,7 +128,6 @@ public class Vista {
                 servidorLinea = 3;
                 vaciarPantalla();
                 menuSinConexion();
-                eligeJugador();
                 break;
             case 3:
                 vaciarPantalla();
@@ -143,9 +142,25 @@ public class Vista {
     //Que el menu de configuracion pueda ver las configuraciones que tiene ya el usuario y pueda
     // cambiarlas si selecciona una opcion.
     private void menuConfiguracion() {
-        //Mostrar las configuraciones.
+        Scanner sc = new Scanner(System.in);
+        String respuesta;
+        
+        controlConfig.mostrarConfiguracion();
 
-        cambiarConfiguracion();
+        do {
+            System.out.println("Quieres cambiar las configuraciones? Escriba SI o NO");
+            respuesta = sc.nextLine();
+
+            if (respuesta.equalsIgnoreCase("SI")) {
+                cambiarConfiguracion();
+                menuSinConexion();
+            } else if (respuesta.equalsIgnoreCase("NO")) {
+                menuSinConexion();
+            } else {
+                System.out.println("Opcion incorrecta.");
+            }
+        } while (!respuesta.equalsIgnoreCase("SI") && !respuesta.equalsIgnoreCase("NO"));
+
     }
 
     private void cambiarConfiguracion() throws AssertionError {
@@ -170,7 +185,7 @@ public class Vista {
         do {
             System.out.println("###################");
             System.out.println("Eliga el idioma: ");
-            System.out.println("1. Castellano");
+            System.out.println("1. Espanol");
             System.out.println("2. Ingles");
             System.out.println("###################");
             System.out.println();
@@ -186,7 +201,7 @@ public class Vista {
         } while (opConfLenguaje < 1 || opConfLenguaje > 2);
         switch (opConfLenguaje) {
             case 1:
-                confLenguaje = "Castellano";
+                confLenguaje = "Espanol";
                 break;
             case 2:
                 confLenguaje = "Ingles";
@@ -194,7 +209,7 @@ public class Vista {
             default:
                 throw new AssertionError();
         }
-        aplicarConfiguraciones(idJugador, confSonido, confResolucion, confLenguaje);
+        aplicarConfiguraciones(confSonido, confResolucion, confLenguaje);
     }
 
     private void menuSinConexion() {
@@ -251,12 +266,12 @@ public class Vista {
         }
     }
 
-    private void aplicarConfiguraciones(int idJugador, String confSonido, String confResolucion, String confLenguaje) {
+    private void aplicarConfiguraciones(String confSonido, String confResolucion, String confLenguaje) {
         boolean confSonidoBool;
 
         confSonidoBool = confSonido.equals("Si");
 
-        controlConfig.actualizarConfiguracion(idJugador, confSonidoBool, confResolucion, confLenguaje);
+        controlConfig.actualizarConfiguracion(confSonidoBool, confResolucion, confLenguaje);
     }
 
     private static void mensajeSalida() {
@@ -319,9 +334,10 @@ public class Vista {
 
                 System.out.print("Escribe el id del jugador que quieres usar: ");
                 int idJugadorJuego = sc.nextInt();
-                
+
                 if (servidorLinea == 3) {
                     System.out.print("Para asegurar, escribe el nombre de usuario: ");
+                    sc.nextLine();
                     nombreJugador = sc.nextLine();
                 }
 
@@ -338,8 +354,8 @@ public class Vista {
                 // Si existe enseñar los juegos que puede jugar y si no repetir la solicitud del nombre del jugador.
                 if (existeJugador) {
                     vaciarPantalla();
-                    if (mostrarJuegosServidor()) {
-                        elegirJuego(idJugadorJuego);
+                    if (mostrarJuegosServidor(idJugadorJuego, nombreJugador)) {
+                        elegirJuego(idJugadorJuego, nombreJugador);
                     } else {
                         if (servidorLinea == 3) {
                             menuSinConexion();
@@ -389,10 +405,10 @@ public class Vista {
         return controlJugador.comprobarJugador(idJugadorJuego, nombreJugador, servidorLinea);
     }
 
-    private boolean mostrarJuegosServidor() {
+    private boolean mostrarJuegosServidor(int idJugadorJuego, String nombreJuego) {
         List<String> listaJuegos = new LinkedList();
 
-        listaJuegos = controlJuegos.obtenerJuegos(servidorLinea);
+        listaJuegos = controlJuegos.obtenerJuegos(servidorLinea, idJugadorJuego, nombreJuego);
 
         if (listaJuegos == null) {
             vaciarPantalla();
@@ -424,17 +440,21 @@ public class Vista {
         System.out.println("#######################################################");
     }
 
-    private void elegirJuego(int idJugadorJuego) {
+    private void elegirJuego(int idJugadorJuego, String nombreJugador) {
         Scanner sc = new Scanner(System.in);
         boolean existeJuego, juegoSinDescargar;
-        String isbnJuego;
+        String isbnJuego, nombreJuego = "";
         //COMPROBAR QUE EL JUEGO EXISTE
         do {
             System.out.print("Escribe el isbn del juego que quieres jugar: ");
             isbnJuego = sc.nextLine();
 
-            
-            existeJuego = comprobarJuego(isbnJuego);
+            if (servidorLinea == 3) {
+                System.out.print("Para asegurar, escriba el nombre del juego: ");
+                nombreJuego = sc.nextLine();
+            }
+
+            existeJuego = comprobarJuego(isbnJuego, nombreJuego);
 
             if (!existeJuego) {
                 System.out.println("El juego indicado no existe.");
@@ -450,10 +470,10 @@ public class Vista {
 
         } while (!existeJuego);
 
-        simularPartida(isbnJuego, idJugadorJuego);
+        simularPartida(isbnJuego, nombreJuego, idJugadorJuego, nombreJugador);
     }
 
-    private void simularPartida(String isbnJuego, int idJugadorJuego) {
+    private void simularPartida(String isbnJuego, String nombreJuego, int idJugadorJuego, String nombreJugador) {
         List<Integer> cambiosPartidaJugada = new LinkedList();
 
         System.out.println("Iniciando el juego...");
@@ -465,19 +485,19 @@ public class Vista {
         mostrarMensajePartidaSimulada(cambiosPartidaJugada);
         mostrarDatosPartidaSimulada(cambiosPartidaJugada);
 
-        if (crearPartidaSimulada(cambiosPartidaJugada, idJugadorJuego, isbnJuego)) {
+        if (crearPartidaSimulada(cambiosPartidaJugada, idJugadorJuego, nombreJugador, isbnJuego, nombreJuego)) {
             System.out.println("La partida se ha actualizado correctamente.");
         } else {
             System.out.println("La partida no se ha podido actualizar correctamente.");
         }
 
-        if (actualizarDatosJugadorSimulada(cambiosPartidaJugada, idJugadorJuego)) {
+        if (actualizarDatosJugadorSimulada(cambiosPartidaJugada, idJugadorJuego, nombreJugador)) {
             System.out.println("Los datos del jugador se han actualizado correctamente.");
         } else {
             System.out.println("Los datos del jugador no se han podido actualizar.");
         }
 
-        if (actualizarVideojuego(isbnJuego, idJugadorJuego)) {
+        if (actualizarVideojuego(isbnJuego, nombreJuego, idJugadorJuego, nombreJugador)) {
             System.out.println("Los datos del juego se ha actualizado.");
         } else {
             System.out.println("Los datos del juego no se ha podido actualizar.");
@@ -563,20 +583,20 @@ public class Vista {
         System.out.println("====================================");
     }
 
-    private boolean crearPartidaSimulada(List<Integer> cambiosPartidaJugada, int idJugadorJuego, String isbnJuego) {
-        return controlPartida.crearPartidaSimulada(cambiosPartidaJugada, servidorLinea, idJugadorJuego, isbnJuego);
+    private boolean crearPartidaSimulada(List<Integer> cambiosPartidaJugada, int idJugadorJuego, String nombreJugador, String isbnJuego, String nombreJuego) {
+        return controlPartida.crearPartidaSimulada(cambiosPartidaJugada, servidorLinea, idJugadorJuego, nombreJugador, isbnJuego, nombreJuego);
     }
 
-    private boolean actualizarDatosJugadorSimulada(List<Integer> cambiosPartidaJugada, int idJugadorJuego) {
-        return controlJugador.actualizarDatosJugador(cambiosPartidaJugada, idJugadorJuego, servidorLinea);
+    private boolean actualizarDatosJugadorSimulada(List<Integer> cambiosPartidaJugada, int idJugadorJuego, String nombreJugador) {
+        return controlJugador.actualizarDatosJugador(cambiosPartidaJugada, idJugadorJuego, nombreJugador, servidorLinea);
     }
 
-    private boolean actualizarVideojuego(String isbnJuego, int idJugador) {
-        return controlJuegos.actualizarVideojuego(isbnJuego, servidorLinea, idJugador);
+    private boolean actualizarVideojuego(String isbnJuego, String nombreJuego, int idJugador, String nombreJugador) {
+        return controlJuegos.actualizarVideojuego(isbnJuego, nombreJuego, servidorLinea, idJugador, nombreJugador);
     }
 
-    private boolean comprobarJuego(String isbnJuego) {
-        return controlJuegos.comprobarJuego(isbnJuego, servidorLinea);
+    private boolean comprobarJuego(String isbnJuego, String nombreJuego) {
+        return controlJuegos.comprobarJuego(isbnJuego, nombreJuego, servidorLinea);
     }
 
     private boolean comprobarJuegoSinDescargar(String isbnJuego) {

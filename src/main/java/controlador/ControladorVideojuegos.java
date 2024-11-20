@@ -38,7 +38,7 @@ public class ControladorVideojuegos {
         this.videojuegoDAOMySQL = videojuegoDAOMySQL;
     }
 
-    public List<String> obtenerJuegos(int servidor) {
+    public List<String> obtenerJuegos(int servidor, int idJugador, String nombreJuego) {
         List<String> listaJuegos = new LinkedList();
 
         switch (servidor) {
@@ -51,7 +51,7 @@ public class ControladorVideojuegos {
                 listaJuegos = videojuegoDAOMySQL.obtenerJuegosString();
                 break;
             case 3:
-                listaJuegos = videojuegoDAOSQlite.obtenerJuegos();
+                listaJuegos = videojuegoDAOSQlite.obtenerJuegos(idJugador, nombreJuego);
                 break;
             default:
                 throw new AssertionError();
@@ -59,7 +59,7 @@ public class ControladorVideojuegos {
         return listaJuegos;
     }
 
-    public boolean actualizarVideojuego(String isbnJuego, int servidor, int idJugador) {
+    public boolean actualizarVideojuego(String isbnJuego, String nombreJuego, int servidor, int idJugador, String nombreJugador) {
         switch (servidor) {
             case 1:
                 //Postgre
@@ -69,20 +69,20 @@ public class ControladorVideojuegos {
                 return videojuegoDAOMySQL.actualizarVidejuego(isbnJuego, idJugador);
             case 3:
                 //SQLite
-                return videojuegoDAOSQlite.actualizarVidejuego(isbnJuego, idJugador);
+                return videojuegoDAOSQlite.actualizarVidejuego(isbnJuego, nombreJuego, idJugador, nombreJugador);
             default:
                 throw new AssertionError();
         }
     }
 
-    public boolean comprobarJuego(String isbnJuego, int servidorLinea) {
+    public boolean comprobarJuego(String isbnJuego, String nombreJuego, int servidorLinea) {
         switch (servidorLinea) {
             case 1:
                 return videojuegoDAOPostgre.comprobarJuego(isbnJuego);
             case 2:
                 return videojuegoDAOMySQL.comprobarJuego(isbnJuego);
             case 3:
-                return videojuegoDAOSQlite.comprobarJuego(isbnJuego);
+                return videojuegoDAOSQlite.comprobarJuego(isbnJuego, nombreJuego);
             default:
                 throw new AssertionError();
         }

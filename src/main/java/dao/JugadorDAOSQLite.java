@@ -15,12 +15,12 @@ import java.util.List;
  */
 public class JugadorDAOSQLite {
 
-    private String URL = "jdbc:sqlite:H:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
-    private int player_id, experience, life_level, coins, session_count;
+    private String URL = "jdbc:sqlite:G:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
+    private int user_id, experience, life_level, coins, session_count, bd;
     private String last_login, nick_name;
 
-    public JugadorDAOSQLite(int player_id, String nick_name, int experience, int life_level, int coins) {
-        this.player_id = player_id;
+    public JugadorDAOSQLite(int user_id, String nick_name, int experience, int life_level, int coins) {
+        this.user_id = user_id;
         this.nick_name = nick_name;
         this.experience = experience;
         this.life_level = life_level;
@@ -28,8 +28,29 @@ public class JugadorDAOSQLite {
         this.last_login = LocalDateTime.now().toString();
     }
 
-    public JugadorDAOSQLite(int player_id, int experience, int life_level, int coins, int session_count, String last_login, String nick_name) {
-        this.player_id = player_id;
+    public JugadorDAOSQLite(int user_id, String nick_name, int experience, int life_level, int coins, int bd) {
+        this.user_id = user_id;
+        this.nick_name = nick_name;
+        this.experience = experience;
+        this.life_level = life_level;
+        this.coins = coins;
+        this.last_login = LocalDateTime.now().toString();
+        this.bd = bd;
+    }
+
+    public JugadorDAOSQLite(int user_id, int experience, int life_level, int coins, int session_count, String last_login, String nick_name, int BD) {
+        this.user_id = user_id;
+        this.experience = experience;
+        this.life_level = life_level;
+        this.coins = coins;
+        this.session_count = session_count;
+        this.last_login = last_login;
+        this.nick_name = nick_name;
+        this.bd = BD;
+    }
+
+    public JugadorDAOSQLite(int user_id, int experience, int life_level, int coins, int session_count, String last_login, String nick_name) {
+        this.user_id = user_id;
         this.experience = experience;
         this.life_level = life_level;
         this.coins = coins;
@@ -42,12 +63,12 @@ public class JugadorDAOSQLite {
         this(0, "", 0, 0, 0);
     }
 
-    public int getPlayer_id() {
-        return player_id;
+    public int getUser_id() {
+        return user_id;
     }
 
-    public void setPlayer_id(int player_id) {
-        this.player_id = player_id;
+    public void setUser_id(int user_id) {
+        this.user_id = user_id;
     }
 
     public int getExperience() {
@@ -98,8 +119,16 @@ public class JugadorDAOSQLite {
         this.session_count = session_count;
     }
 
+    public int getBd() {
+        return bd;
+    }
+
+    public void setBd(int bd) {
+        this.bd = bd;
+    }
+
     public boolean comprobarJugador(int idJugador, String nombreJugador) {
-        String sql = "SELECT COUNT(*) FROM jugador WHERE player_id = ? AND nick_name = ?";
+        String sql = "SELECT COUNT(*) FROM jugador WHERE user_id = ? AND nick_name = ?";
         try (Connection con = DriverManager.getConnection(URL); PreparedStatement pstmt = con.prepareStatement(sql)) {
             pstmt.setInt(1, idJugador);
             pstmt.setString(2, nombreJugador);
@@ -114,19 +143,19 @@ public class JugadorDAOSQLite {
     public List<String> obtenerJugadores() {
         List<String> listaJugadores = new LinkedList();
 
-        String consulta = "SELECT player_id, nick_name, experience, life_level, coins FROM jugador ORDER BY player_id";
+        String consulta = "SELECT user_id, nick_name, experience, life_level, coins FROM jugador ORDER BY user_id";
 
         try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
 
             while (resultado.next()) {
-                player_id = resultado.getInt("player_id");
+                user_id = resultado.getInt("user_id");
                 nick_name = resultado.getString("nick_name");
                 experience = resultado.getInt("experience");
                 life_level = resultado.getInt("life_level");
                 coins = resultado.getInt("coins");
                 last_login = LocalDateTime.now().toString();
 
-                JugadorDAOSQLite jugadorSQLite = new JugadorDAOSQLite(player_id, nick_name, experience, life_level, coins);
+                JugadorDAOSQLite jugadorSQLite = new JugadorDAOSQLite(user_id, nick_name, experience, life_level, coins);
 
                 String lineaJugador = jugadorSQLite.toString();
 
@@ -142,19 +171,26 @@ public class JugadorDAOSQLite {
 
     @Override
     public String toString() {
-        return String.format("%-6d%-15s %-12d %-15d %-6d", player_id, nick_name, experience, life_level, coins);
+        return String.format("%-6d%-15s %-12d %-15d %-6d", user_id, nick_name, experience, life_level, coins);
     }
 
     public boolean actualizarDatosJugador(JugadorDAOSQLite jugadorDAOSQLite) {
+        String consulta;
         // Valores a actualizar
         int experienceN = jugadorDAOSQLite.getExperience();
         int lifeLevelN = jugadorDAOSQLite.getLife_level();
         int coinsN = jugadorDAOSQLite.getCoins();
-        int idJugador = jugadorDAOSQLite.getPlayer_id();
+        int idJugador = jugadorDAOSQLite.getUser_id();
+        String nombre = jugadorDAOSQLite.getNick_name();
         LocalDateTime lastLogin = LocalDateTime.now();
 
-        String consulta = "UPDATE jugador SET experience = experience + ?, life_level = life_level + ?, "
-                + "coins = coins + ?, session_count = session_count + 1, last_login = ? WHERE player_id = ?";
+        if (jugadorDAOSQLite.getBd() == 0) {
+            consulta = "UPDATE jugador SET experience = experience + ?, life_level = life_level + ?, "
+                    + "coins = coins + ?, session_count = session_count + 1, last_login = ? WHERE user_id = ? AND nick_name = ?";
+        } else {
+            consulta = "UPDATE jugador SET experience = experience + ?, life_level = life_level + ?, "
+                    + "coins = coins + ?, session_count = session_count + 1, last_login = ? WHERE user_id = ? AND BD = ?";
+        }
 
         try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta)) {
 
@@ -164,6 +200,11 @@ public class JugadorDAOSQLite {
             statement.setInt(3, coinsN);
             statement.setString(4, lastLogin.toString());
             statement.setInt(5, idJugador);
+            if (jugadorDAOSQLite.getBd() == 0) {
+                statement.setString(6, nombre);
+            } else {
+                statement.setInt(6, jugadorDAOSQLite.getBd());
+            }
 
             // Ejecutar la consulta de actualización
             int rowsUpdated = statement.executeUpdate();
@@ -183,7 +224,7 @@ public class JugadorDAOSQLite {
         try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
 
             while (resultado.next()) {
-                int user_id = resultado.getInt("player_id");
+                int user_id = resultado.getInt("user_id");
                 String nickName = resultado.getString("nick_name");
                 int experience = resultado.getInt("experience");
                 int lifeLevel = resultado.getInt("life_level");
@@ -191,7 +232,7 @@ public class JugadorDAOSQLite {
                 int session_count = resultado.getInt("session_count");
                 String last_login = resultado.getString("last_login");
 
-                JugadorDAOSQLite jugador = new JugadorDAOSQLite(user_id, experience, lifeLevel, coins, session_count, last_login, nickName );
+                JugadorDAOSQLite jugador = new JugadorDAOSQLite(user_id, experience, lifeLevel, coins, session_count, last_login, nickName);
 
                 listaJugadores.add(jugador);
             }

@@ -18,12 +18,14 @@ public class PartidaDAOSQLite {
 
     private static final String URL = "jdbc:sqlite:G:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
     private int user_id, experience, life_level, coins;
-    private String isbn;
+    private String isbn, nick_name, title;
     private LocalDateTime session_date;
 
-    public PartidaDAOSQLite(String isbn, int user_id, int experience, int life_level, int coins, LocalDateTime session_date) {
+    public PartidaDAOSQLite(String isbn, String title, int user_id, String nick_name, int experience, int life_level, int coins, LocalDateTime session_date) {
         this.isbn = isbn;
+        this.title = title;
         this.user_id = user_id;
+        this.nick_name = nick_name;
         this.experience = experience;
         this.life_level = life_level;
         this.coins = coins;
@@ -31,7 +33,7 @@ public class PartidaDAOSQLite {
     }
 
     public PartidaDAOSQLite() {
-        this("", 0, 0, 0, 0, null);
+        this("", "", 0, "", 0, 0, 0, null);
     }
 
     public int getUser_id() {
@@ -82,18 +84,36 @@ public class PartidaDAOSQLite {
         this.session_date = session_date;
     }
 
+    public String getNick_name() {
+        return nick_name;
+    }
+
+    public void setNick_name(String nick_name) {
+        this.nick_name = nick_name;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+    
     public boolean crearPartida(PartidaDAOSQLite partidaSQLite) {
 
-        String sql = "INSERT INTO partidasJugadas (isbn, player_id, experience, life_level, coins, session_date) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO partida (isbn, title, user_id, nick_name, experience, life_level, coins, session_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(sql)) {
 
             statement.setString(1, partidaSQLite.getIsbn());
-            statement.setInt(2, partidaSQLite.getUser_id());
-            statement.setInt(3, partidaSQLite.getExperience());
-            statement.setInt(4, partidaSQLite.getLife_level());
-            statement.setInt(5, partidaSQLite.getCoins());
-            statement.setString(6, partidaSQLite.getSession_date().toString());
+            statement.setString(2, partidaSQLite.getTitle());
+            statement.setInt(3, partidaSQLite.getUser_id());
+            statement.setString(4, partidaSQLite.getNick_name());
+            statement.setInt(5, partidaSQLite.getExperience());
+            statement.setInt(6, partidaSQLite.getLife_level());
+            statement.setInt(7, partidaSQLite.getCoins());
+            statement.setString(8, partidaSQLite.getSession_date().toString());
 
             int lineasCambiadas = statement.executeUpdate();
 

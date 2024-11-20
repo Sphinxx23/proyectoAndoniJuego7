@@ -38,7 +38,7 @@ public class ControladorPartida {
         return partidaDAOPostgre.simularPartida();
     }
 
-    public boolean crearPartidaSimulada(List<Integer> cambiosPartidaJugada, int servidorLinea, int idJugadorJuego, String isbnJuego) {
+    public boolean crearPartidaSimulada(List<Integer> cambiosPartidaJugada, int servidorLinea, int idJugadorJuego, String nombreJugador, String isbnJuego, String nombreJuego) {
         switch (servidorLinea) {
             case 1:
                 //Postgre
@@ -50,7 +50,7 @@ public class ControladorPartida {
                 return partidaDAOmySQL.crearPartida(partidaDAOmySQL);
             case 3:
                 //SQLite
-                PartidaDAOSQLite partidaSQLite = new PartidaDAOSQLite(isbnJuego,idJugadorJuego,cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2), LocalDateTime.now());
+                PartidaDAOSQLite partidaSQLite = new PartidaDAOSQLite(isbnJuego, nombreJuego,idJugadorJuego, nombreJugador, cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2), LocalDateTime.now());
                 return partidaDAOSQLite.crearPartida(partidaSQLite);
             default:
                 return false;

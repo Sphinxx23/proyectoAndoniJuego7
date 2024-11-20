@@ -265,7 +265,7 @@ public class VideojuegoDAOPostgre {
 
             VideojuegoDAOPostgre juegoPost = obtenerJuegoISBN(isbnJuego);
             if (juegoPost != null) {
-                descargarJuego(conn, isbnJuego, juegoPost);
+                descargarJuego(conn, juegoPost);
                 conn.commit(); // Confirmar la transacción
                 return true;
             } else {
@@ -280,7 +280,7 @@ public class VideojuegoDAOPostgre {
     }
 
     private boolean isJuegoDescargado(Connection conn, String isbnJuego) throws SQLException {
-        String query = "SELECT COUNT(*) FROM videojuegos WHERE isbn = ?";
+        String query = "SELECT COUNT(*) FROM videojuego WHERE isbn = ?";
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, isbnJuego);
             ResultSet rs = stmt.executeQuery();
@@ -288,14 +288,15 @@ public class VideojuegoDAOPostgre {
         }
     }
 
-    private void descargarJuego(Connection conn, String isbnJuego, VideojuegoDAOPostgre juegoPost) throws SQLException {
-        String insertQuery = "INSERT INTO videojuegos (isbn, title, player_count, total_sessions, last_session) VALUES (?, ?, ?, ?, ?)";
+    private void descargarJuego(Connection conn, VideojuegoDAOPostgre juegoPost) throws SQLException {
+        String insertQuery = "INSERT INTO videojuego (isbn, title, player_count, total_sessions, last_session, BD) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
             stmt.setString(1, juegoPost.getIsbn());
             stmt.setString(2, juegoPost.getNombreJuego());
             stmt.setInt(3, juegoPost.getPlayer_count()); // player_count inicial
             stmt.setInt(4, juegoPost.getSession_count()); // total_sessions inicial
             stmt.setString(5, juegoPost.getLast_session()); // last_session inicial
+            stmt.setInt(6, 1); // total_sessions inicial
             stmt.executeUpdate();
             System.out.println("Juego descargado e insertado en la base de datos.");
         }

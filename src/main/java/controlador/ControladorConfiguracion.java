@@ -27,12 +27,16 @@ public class ControladorConfiguracion {
         this.j = modelo;
     }
     
-    public void actualizarConfiguracion(int idJugador, boolean configSonido, String confResolucion, String confLenguaje){
-        if (confDAO.actualizarConfiguracion(idJugador, configSonido, confResolucion, confLenguaje)) {
+    public void actualizarConfiguracion(boolean configSonido, String confResolucion, String confLenguaje){
+        if (confDAO.actualizarConfiguracion(configSonido, confResolucion, confLenguaje)) {
             vista.mensaje("Configuración actualizada correctamente.");
         }else{
             vista.mensaje("La configuracion no se ha podido aplicar.");
         }
+    }
+
+    public void mostrarConfiguracion() {
+        confDAO.mostrarConfiguracion();
     }
     
 }

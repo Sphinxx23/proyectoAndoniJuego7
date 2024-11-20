@@ -22,15 +22,16 @@ import java.util.logging.Logger;
 public class VideojuegoDAOSQLite {
 
     private String isbn, nombreJuego, last_session;
-    private int player_count, session_count;
+    private int player_count, session_count, bd;
     private static final String URL = "jdbc:sqlite:G:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
 
-    public VideojuegoDAOSQLite(String isbn, String nombreJuego, String last_session, int player_count, int session_count) {
+    public VideojuegoDAOSQLite(String isbn, String nombreJuego, String last_session, int player_count, int session_count, int bd) {
         this.isbn = isbn;
         this.nombreJuego = nombreJuego;
         this.last_session = last_session;
         this.player_count = player_count;
         this.session_count = session_count;
+        this.bd = bd;
     }
 
     public VideojuegoDAOSQLite(String isbn, String nombreJuego) {
@@ -82,18 +83,33 @@ public class VideojuegoDAOSQLite {
         this.session_count = session_count;
     }
 
-    public static List<String> obtenerJuegos() {
+    public int getBd() {
+        return bd;
+    }
+
+    public void setBd(int bd) {
+        this.bd = bd;
+    }
+
+    public static List<String> obtenerJuegos(int idJugador, String nombreJugador) {
         List<String> listaJugadores = new LinkedList();
 
-        String consulta = "SELECT isbn, title FROM videojuegos";
+        JugadorDAOSQLite jugador = obtenerJugador(idJugador, nombreJugador);
 
-        try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
+        String consulta = "SELECT isbn, title FROM videojuego where BD = ?";
+
+        try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta)) {
+
+            statement.setInt(1, jugador.getBd());
+            ResultSet resultado = statement.executeQuery();
 
             while (resultado.next()) {
                 String isbn = resultado.getString("isbn");
                 String nombreJuego = resultado.getString("title");
 
-                String lineaJuego = isbn + " - " + nombreJuego;
+                VideojuegoDAOMySQL juego = new VideojuegoDAOMySQL(isbn, nombreJuego);
+                
+                String lineaJuego = juego.toString();
 
                 listaJugadores.add(lineaJuego);
             }
@@ -110,25 +126,58 @@ public class VideojuegoDAOSQLite {
         }
     }
 
+    private static JugadorDAOSQLite obtenerJugador(int idJugador, String nombreJugador) {
+
+        String consulta = "SELECT * FROM jugador where user_id = ? AND nick_name = ?";
+
+        try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta)) {
+
+            statement.setInt(1, idJugador);
+            statement.setString(2, nombreJugador);
+
+            ResultSet resultado = statement.executeQuery();
+
+            while (resultado.next()) {
+                int user_id = resultado.getInt("user_id");
+                String nickName = resultado.getString("nick_name");
+                int experience = resultado.getInt("experience");
+                int lifeLevel = resultado.getInt("life_level");
+                int coins = resultado.getInt("coins");
+                int session_count = resultado.getInt("session_count");
+                String last_login = resultado.getString("last_login");
+                int BD = resultado.getInt("BD");
+
+                JugadorDAOSQLite jugador = new JugadorDAOSQLite(user_id, experience, lifeLevel, coins, session_count, last_login, nickName, BD);
+                return jugador;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return String.format("%-15s %-12s", isbn, nombreJuego);
     }
 
-    public boolean actualizarVidejuego(String isbnJuego, int idJugador) {
+    public boolean actualizarVidejuego(String isbnJuego, String nombreJuego, int idJugador, String nombreJugador) {
         LocalDateTime last_session = LocalDateTime.now();
 
         try {
             int playCoun;
-            playCoun = consultaPlayerCount(isbnJuego, idJugador);
+            playCoun = consultaPlayerCount(isbnJuego, nombreJuego, idJugador, nombreJugador);
 
             if (playCoun != 1) {
-                String sql = "UPDATE videojuegos SET total_sessions = total_sessions + 1, last_session = ? WHERE isbn = ?";
+                String sql = "UPDATE videojuego SET total_sessions = total_sessions + 1, last_session = ? WHERE isbn = ? AND title = ?";
 
                 try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(sql)) {
 
                     statement.setString(1, last_session.toString());
                     statement.setString(2, isbnJuego);
+                    statement.setString(3, nombreJuego);
                     statement.executeUpdate();
 
                     return true;
@@ -138,7 +187,7 @@ public class VideojuegoDAOSQLite {
             }
 
             if (playCoun == 1) {
-                String sql = "UPDATE videojuegos SET player_count = player_count + 1,total_sessions = total_sessions + 1, last_session = ? WHERE isbn = ?";
+                String sql = "UPDATE videojuego SET player_count = player_count + 1,total_sessions = total_sessions + 1, last_session = ? WHERE isbn = ?";
 
                 try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(sql)) {
 
@@ -158,13 +207,15 @@ public class VideojuegoDAOSQLite {
         return false;
     }
 
-    private int consultaPlayerCount(String isbn, int idJugador) throws SQLException {
-        String sql = "SELECT COUNT(*) AS count FROM partidasJugadas WHERE isbn = ? AND player_id = ?";
+    private int consultaPlayerCount(String isbn, String nombreJuego, int idJugador, String nombreJugador) throws SQLException {
+        String sql = "SELECT COUNT(*) AS count FROM partida WHERE isbn = ? AND title = ? AND user_id = ? AND nick_name = ?";
 
         try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(sql)) {
 
             statement.setString(1, isbn);
-            statement.setInt(2, idJugador);
+            statement.setString(2, nombreJuego);
+            statement.setInt(3, idJugador);
+            statement.setString(4, nombreJugador);
 
             ResultSet rs = statement.executeQuery();
 
@@ -178,13 +229,14 @@ public class VideojuegoDAOSQLite {
 
     }
 
-    public boolean comprobarJuego(String isbnJuego) {
-        String query = "SELECT COUNT(*) FROM videojuegos WHERE isbn = ?";
+    public boolean comprobarJuego(String isbnJuego, String nombreJuego) {
+        String query = "SELECT COUNT(*) FROM videojuego WHERE isbn = ? AND title = ?";
 
         try (Connection conn = DriverManager.getConnection(URL); PreparedStatement stmt = conn.prepareStatement(query)) {
 
             // Establecer el parámetro en la consulta
             stmt.setString(1, isbnJuego);
+            stmt.setString(2, nombreJuego);
 
             // Ejecutar la consulta
             ResultSet rs = stmt.executeQuery();
@@ -228,7 +280,7 @@ public class VideojuegoDAOSQLite {
     public List<VideojuegoDAOSQLite> obtenerJuegosObjeto() {
         List<VideojuegoDAOSQLite> listaJuegos = new LinkedList();
 
-        String consulta = "SELECT * FROM videojuegos";
+        String consulta = "SELECT * FROM videojuego";
 
         try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
 
@@ -238,8 +290,9 @@ public class VideojuegoDAOSQLite {
                 int player_count = resultado.getInt("player_count");
                 int session_count = resultado.getInt("total_sessions");
                 String last_session = resultado.getString("last_session");
+                int bd = resultado.getInt("BD");
 
-                VideojuegoDAOSQLite videojuego = new VideojuegoDAOSQLite(isbn, nombreJuego, last_session, player_count, session_count);
+                VideojuegoDAOSQLite videojuego = new VideojuegoDAOSQLite(isbn, nombreJuego, last_session, player_count, session_count, bd);
 
                 listaJuegos.add(videojuego);
             }
@@ -251,5 +304,4 @@ public class VideojuegoDAOSQLite {
         }
     }
 
-    
 }

@@ -225,6 +225,7 @@ public class JugadorDAOPostgreeSQL {
             }
 
             JugadorDAOPostgreeSQL jugador = obtenerJugadorID(idJugadorJuego);
+            
             if (jugador != null) {
                 descargarJugador(conn, jugador);
                 conn.commit(); // Confirmar la transacción
@@ -240,7 +241,7 @@ public class JugadorDAOPostgreeSQL {
     }
 
     private boolean isJugadorDescargado(Connection conn, int idJugadorJuego) throws SQLException {
-        String query = "SELECT COUNT(*) FROM jugador WHERE player_id = ?";
+        String query = "SELECT COUNT(*) FROM jugador WHERE user_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, idJugadorJuego);
             ResultSet rs = stmt.executeQuery();
@@ -276,7 +277,7 @@ public class JugadorDAOPostgreeSQL {
     }
 
     private void descargarJugador(Connection conn, JugadorDAOPostgreeSQL jugador) throws SQLException {
-        String insertQuery = "INSERT INTO jugador (player_id, nick_name, experience, life_level, coins, session_count, last_login) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String insertQuery = "INSERT INTO jugador (user_id, nick_name, experience, life_level, coins, session_count, last_login, BD) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
             stmt.setInt(1, jugador.getUser_id());
             stmt.setString(2, jugador.getNickName());
@@ -285,6 +286,7 @@ public class JugadorDAOPostgreeSQL {
             stmt.setInt(5, jugador.getCoins()); // last_session inicial
             stmt.setInt(6, jugador.getSession_count()); // last_session inicial
             stmt.setString(7, jugador.getLast_login()); // last_session inicial
+            stmt.setInt(8, 1);
             stmt.executeUpdate();
             System.out.println("Juego descargado e insertado en la base de datos.");
         }

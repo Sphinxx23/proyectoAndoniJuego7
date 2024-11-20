@@ -76,19 +76,23 @@ public class ControladorJugador {
         }
     }
 
-    public boolean actualizarDatosJugador(List<Integer> cambiosPartidaJugada, int idJugadorJuego, int servidor) {
+    public boolean actualizarDatosJugador(List<Integer> cambiosPartidaJugada, int idJugadorJuego, String nombreJugador, int servidor) {
         switch (servidor) {
             case 1:
                 //Postgre
                 JugadorDAOPostgreeSQL jugadorPostgreeSQL = new JugadorDAOPostgreeSQL(idJugadorJuego, cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2), "");
+                JugadorDAOSQLite jugadorDAOSQLiteA = new JugadorDAOSQLite(idJugadorJuego, nombreJugador, cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2), 1);
+                jugadorDAOSQLiteA.actualizarDatosJugador(jugadorDAOSQLiteA);
                 return jugadorPostgreeSQL.actualizarDatosJugador(jugadorPostgreeSQL);
             case 2:
                 //MySQL
                 JugadorDAOMySQL jugadorDAOMySQL = new JugadorDAOMySQL(idJugadorJuego, cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2), "");
+                JugadorDAOSQLite jugadorDAOSQLiteB = new JugadorDAOSQLite(idJugadorJuego, nombreJugador, cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2), 2);
+                jugadorDAOSQLiteB.actualizarDatosJugador(jugadorDAOSQLiteB);
                 return jugadorDAOMySQL.actualizarDatosJugador(jugadorDAOMySQL);
             case 3:
                 //SQLite
-                JugadorDAOSQLite jugadorDAOSQLite = new JugadorDAOSQLite(idJugadorJuego, "", cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2));
+                JugadorDAOSQLite jugadorDAOSQLite = new JugadorDAOSQLite(idJugadorJuego, nombreJugador, cambiosPartidaJugada.get(0), cambiosPartidaJugada.get(1), cambiosPartidaJugada.get(2));
                 return jugadorDAOSQLite.actualizarDatosJugador(jugadorDAOSQLite);
             default:
                 return false;

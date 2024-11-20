@@ -44,6 +44,8 @@ public class VideojuegoDAOMySQL {
         this("", "");
     }
 
+    
+
     public String getIsbn() {
         return isbn;
     }
@@ -149,9 +151,9 @@ public class VideojuegoDAOMySQL {
                 return false; // El juego ya está descargado
             }
 
-            String tituloJuego = obtenerTituloJuego(isbnJuego);
-            if (tituloJuego != null) {
-                descargarJuego(conn, isbnJuego, tituloJuego);
+            VideojuegoDAOMySQL juegoMySQL = obtenerJuegoISBN(isbnJuego); 
+            if (juegoMySQL != null) {
+                descargarJuego(conn, juegoMySQL);
                 conn.commit(); // Confirmar la transacción
                 return true;
             } else {
@@ -174,14 +176,15 @@ public class VideojuegoDAOMySQL {
         }
     }
 
-    private void descargarJuego(Connection conn, String isbnJuego, String tituloJuego) throws SQLException {
-        String insertQuery = "INSERT INTO videojuegos (isbn, title, player_count, total_sessions, last_session) VALUES (?, ?, ?, ?, ?)";
+    private void descargarJuego(Connection conn, VideojuegoDAOMySQL juegoMySQL) throws SQLException {
+        String insertQuery = "INSERT INTO videojuegos (isbn, title, player_count, total_sessions, last_session, BD) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
-            stmt.setString(1, isbnJuego);
-            stmt.setString(2, tituloJuego);
-            stmt.setInt(3, 0); // player_count inicial
-            stmt.setInt(4, 0); // total_sessions inicial
-            stmt.setString(5, "2024-11-14T00:00:00"); // last_session inicial
+            stmt.setString(1, juegoMySQL.getIsbn());
+            stmt.setString(2, juegoMySQL.getNombreJuego());
+            stmt.setInt(3, juegoMySQL.getPlayer_count()); // player_count inicial
+            stmt.setInt(4, juegoMySQL.getSession_count()); // total_sessions inicial
+            stmt.setString(5, juegoMySQL.getLast_session()); // last_session inicial
+            stmt.setInt(6, 2); // total_sessions inicial
             stmt.executeUpdate();
             System.out.println("Juego descargado e insertado en la base de datos.");
         }
@@ -287,6 +290,31 @@ public class VideojuegoDAOMySQL {
             }
 
             return listaJugadores;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private VideojuegoDAOMySQL obtenerJuegoISBN(String isbnJuego) {
+        String consulta = "SELECT * FROM videojuego WHERE isbn = ?";
+
+        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(consulta)) {
+
+            statement.setString(1, isbnJuego);
+
+            ResultSet resultado = statement.executeQuery();
+
+            while (resultado.next()) {
+                isbn = resultado.getString("isbn");
+                nombreJuego = resultado.getString("title");
+                player_count = resultado.getInt("player_count");
+                session_count = resultado.getInt("total_sessions");
+                last_session = resultado.getString("last_session");
+            }
+            
+            VideojuegoDAOMySQL videojuego = new VideojuegoDAOMySQL(isbn, nombreJuego, last_session, player_count, session_count);
+            return videojuego;
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
