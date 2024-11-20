@@ -4,6 +4,7 @@
  */
 package dao;
 
+import conexJSON.ConexJSON;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
  */
 public class PartidaDAOSQLite {
 
-    private static final String URL = "jdbc:sqlite:G:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
+    private static final String URL = ConexJSON.consultarJson("sqlite");
     private int user_id, experience, life_level, coins;
     private String isbn, nick_name, title;
     private LocalDateTime session_date;

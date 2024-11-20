@@ -1,0 +1,19 @@
+{
+    "mysql": {
+      "host": "192.168.153.128",
+      "port": 3306,
+      "user": "usuario",
+      "pass": "Password_1",
+      "database": "proyectoJuego"
+    },
+    "postgres": {
+      "host": "ep-broad-union-a29uia00.eu-central-1.aws.neon.tech",
+      "port": 5432,
+      "user": "proyectoJuego_owner",
+      "pass": "eb4xsQc0ENkU",
+      "database": "proyectoJuego"
+    },
+    "sqlite": {
+      "file": "H:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db"
+    }
+}

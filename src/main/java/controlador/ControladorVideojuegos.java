@@ -88,14 +88,14 @@ public class ControladorVideojuegos {
         }
     }
 
-    public boolean comprobarJuegoSinDescargar(String isbnJuego, int servidorLinea) {
+    public boolean comprobarJuegoSinDescargar(String isbnJuego, String nombreJuego, int servidorLinea) {
         switch (servidorLinea) {
             case 1:
                 //Postgre
-                return videojuegoDAOPostgre.comprobarJuegoSinDescargar(isbnJuego);
+                return videojuegoDAOPostgre.comprobarJuegoSinDescargar(isbnJuego, nombreJuego);
             case 2:
                 //MySQL
-                return videojuegoDAOMySQL.comprobarJuegoSinDescargar(isbnJuego);
+                return videojuegoDAOMySQL.comprobarJuegoSinDescargar(isbnJuego, nombreJuego);
             default:
                 throw new AssertionError();
         }

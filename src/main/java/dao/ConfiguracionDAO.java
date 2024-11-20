@@ -1,10 +1,11 @@
 package dao;
 
+import conexJSON.ConexJSON;
 import java.sql.*;
 
 public class ConfiguracionDAO {
 
-    private final String URL = "jdbc:sqlite:G:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
+    private final String URL = ConexJSON.consultarJson("sqlite");
 
     // Devuelve un boolean para saber que la configuración se ha actualizado correctamente.
     public boolean actualizarConfiguracion(boolean configSonido, String confResolucion, String confLenguaje) {

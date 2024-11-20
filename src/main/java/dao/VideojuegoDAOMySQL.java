@@ -4,6 +4,7 @@
  */
 package dao;
 
+import conexJSON.ConexJSON;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -23,9 +24,7 @@ public class VideojuegoDAOMySQL {
 
     private String isbn, nombreJuego, last_session;
     private int player_count, session_count;
-    private static final String URL = "jdbc:postgresql://ep-broad-union-a29uia00.eu-central-1.aws.neon.tech:5432/proyectoJuego?sslmode=require";
-    private static final String USER = "proyectoJuego_owner";
-    private static final String PASSWORD = "eb4xsQc0ENkU";
+    private static final String URL = ConexJSON.consultarJson("mysql");
 
     public VideojuegoDAOMySQL(String isbn, String nombreJuego, String last_session, int player_count, int session_count) {
         this.isbn = isbn;
@@ -93,7 +92,7 @@ public class VideojuegoDAOMySQL {
 
         String consulta = "SELECT isbn, title FROM videojuego";
 
-        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
+        try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
 
             while (resultado.next()) {
                 String isbn = resultado.getString("isbn");
@@ -121,7 +120,7 @@ public class VideojuegoDAOMySQL {
     public boolean comprobarJuego(String isbnJuego) {
         String query = "SELECT COUNT(*) FROM videojuego WHERE isbn = ?";
 
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement stmt = conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(URL); PreparedStatement stmt = conn.prepareStatement(query)) {
 
             // Establecer el parámetro en la consulta
             stmt.setString(1, isbnJuego);
@@ -141,13 +140,13 @@ public class VideojuegoDAOMySQL {
         return false;
     }
 
-    public boolean comprobarJuegoSinDescargar(String isbnJuego) {
-        String urlSQLite = "jdbc:sqlite:H:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
+    public boolean comprobarJuegoSinDescargar(String isbnJuego, String nombreJuego) {
+        String urlSQLite = ConexJSON.consultarJson("sqlite");
 
         try (Connection conn = DriverManager.getConnection(urlSQLite)) {
             conn.setAutoCommit(false); // Desactiva el auto-commit para usar transacciones
 
-            if (isJuegoDescargado(conn, isbnJuego)) {
+            if (isJuegoDescargado(conn, isbnJuego, nombreJuego)) {
                 return false; // El juego ya está descargado
             }
 
@@ -167,17 +166,18 @@ public class VideojuegoDAOMySQL {
         return false;
     }
 
-    private boolean isJuegoDescargado(Connection conn, String isbnJuego) throws SQLException {
-        String query = "SELECT COUNT(*) FROM videojuegos WHERE isbn = ?";
+    private boolean isJuegoDescargado(Connection conn, String isbnJuego, String nombreJuego) throws SQLException {
+        String query = "SELECT COUNT(*) FROM videojuego WHERE isbn = ? AND title = ?";
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, isbnJuego);
+            stmt.setString(2, nombreJuego);
             ResultSet rs = stmt.executeQuery();
             return rs.next() && rs.getInt(1) > 0;
         }
     }
 
     private void descargarJuego(Connection conn, VideojuegoDAOMySQL juegoMySQL) throws SQLException {
-        String insertQuery = "INSERT INTO videojuegos (isbn, title, player_count, total_sessions, last_session, BD) VALUES (?, ?, ?, ?, ?, ?)";
+        String insertQuery = "INSERT INTO videojuego (isbn, title, player_count, total_sessions, last_session, BD) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
             stmt.setString(1, juegoMySQL.getIsbn());
             stmt.setString(2, juegoMySQL.getNombreJuego());
@@ -193,7 +193,7 @@ public class VideojuegoDAOMySQL {
     private String obtenerTituloJuego(String isbnJuego) {
         String consultaTitulo = "SELECT title FROM videojuego WHERE isbn = ?";
 
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement stmt = conn.prepareStatement(consultaTitulo)) {
+        try (Connection conn = DriverManager.getConnection(URL); PreparedStatement stmt = conn.prepareStatement(consultaTitulo)) {
 
             stmt.setString(1, isbnJuego);
             ResultSet rs = stmt.executeQuery();
@@ -217,7 +217,7 @@ public class VideojuegoDAOMySQL {
             if (playCoun != 1) {
                 String sql = "UPDATE videojuego SET total_sessions = total_sessions + 1, last_session = ? WHERE isbn = ?";
 
-                try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(sql)) {
+                try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(sql)) {
 
                     statement.setString(1, last_session.toString());
                     statement.setString(2, isbnJuego);
@@ -232,7 +232,7 @@ public class VideojuegoDAOMySQL {
             if (playCoun == 1) {
                 String sql = "UPDATE videojuego SET player_count = player_count + 1,total_sessions = total_sessions + 1, last_session = ? WHERE isbn = ?";
 
-                try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(sql)) {
+                try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(sql)) {
 
                     statement.setString(1, last_session.toString());
                     statement.setString(2, isbnJuego);
@@ -253,7 +253,7 @@ public class VideojuegoDAOMySQL {
     private int consultaPlayerCount(String isbn, int idJugador) throws SQLException {
         String sql = "SELECT COUNT(*) AS count FROM partida WHERE isbn = ? AND user_id = ?";
 
-        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(sql)) {
+        try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(sql)) {
 
             statement.setString(1, isbn);
             statement.setInt(2, idJugador);
@@ -275,7 +275,7 @@ public class VideojuegoDAOMySQL {
 
         String consulta = "SELECT * FROM videojuego";
 
-        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
+        try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
 
             while (resultado.next()) {
                 String isbn = resultado.getString("isbn");
@@ -299,7 +299,7 @@ public class VideojuegoDAOMySQL {
     private VideojuegoDAOMySQL obtenerJuegoISBN(String isbnJuego) {
         String consulta = "SELECT * FROM videojuego WHERE isbn = ?";
 
-        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(consulta)) {
+        try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta)) {
 
             statement.setString(1, isbnJuego);
 

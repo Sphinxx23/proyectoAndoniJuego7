@@ -4,6 +4,7 @@
  */
 package dao;
 
+import conexJSON.ConexJSON;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -23,7 +24,7 @@ public class VideojuegoDAOSQLite {
 
     private String isbn, nombreJuego, last_session;
     private int player_count, session_count, bd;
-    private static final String URL = "jdbc:sqlite:G:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
+    private static final String URL = ConexJSON.consultarJson("sqlite");
 
     public VideojuegoDAOSQLite(String isbn, String nombreJuego, String last_session, int player_count, int session_count, int bd) {
         this.isbn = isbn;

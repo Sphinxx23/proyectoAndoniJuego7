@@ -4,6 +4,8 @@
  */
 package dao;
 
+import conexJSON.ConexJSON;
+import static conexJSON.ConexJSON.consultarJson;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -28,28 +30,24 @@ public class SincronizarDAO {
     VideojuegoDAOSQLite videojuegoDAOSQLite = new VideojuegoDAOSQLite();
     JugadorDAOSQLite jugadorDAOSQLite = new JugadorDAOSQLite();
     int servidor;
-    private static final String URLSQLITE = "jdbc:sqlite:G:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
-    private static final String URLP = "jdbc:postgresql://ep-broad-union-a29uia00.eu-central-1.aws.neon.tech:5432/proyectoJuego?sslmode=require";
-    private static final String USERP = "proyectoJuego_owner";
-    private static final String PASSWORDP = "eb4xsQc0ENkU";
-    private static final String URLM = "jdbc:mysql://192.168.153.128:3306/proyectoJuego";
-    private static final String USERM = "usuario",
-            PASSWORDM = "Password_1";
+    private static final String URLSQLITE = ConexJSON.consultarJson("sqlite");
+    private static final String URLP = consultarJson("postgres");
+    private static final String URLM = consultarJson("mysql");
 
     public boolean sincronizarBasesNubeALocal() throws SQLException, ClassNotFoundException {
         List<VideojuegoDAOPostgre> listaJuegosPostgre = videojuegoDAOPostgre.obtenerJuegosObjeto();
         List<JugadorDAOPostgreeSQL> listaJugadoresPostgre = jugadorDAOPostgreeSQL.obtenerJugadoresObjeto();
 
         List<VideojuegoDAOMySQL> listaJuegosMySQL = videojuegoDAOMySQL.obtenerJuegosObjeto();
-//        List<JugadorDAOMySQL> listaJugadoresMySQL = jugadorDAOMySQL.obtenerJugadoresObjeto();
+        List<JugadorDAOMySQL> listaJugadoresMySQL = jugadorDAOMySQL.obtenerJugadoresObjeto();
 
         try {
             actualizarVideojuegosDePostgre(listaJuegosPostgre);
             actualizarJugadoresDePostgre(listaJugadoresPostgre);
 
-//            Class.forName("com.mysql.cj.jdbc.Driver");
-//            actualizarVideojuegosDeMySQL(listaJuegosMySQL);
-//            actualizarJugadoresDeMySQL(listaJugadoresMySQL);
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            actualizarVideojuegosDeMySQL(listaJuegosMySQL);
+            actualizarJugadoresDeMySQL(listaJugadoresMySQL);
             return true;
         } catch (SQLException e) {
             return false;
@@ -191,11 +189,11 @@ public class SincronizarDAO {
 
         actualizarJuegosPostgre(consulta, listaJuegoSQLite);
 
-        //actualizarJuegosMySQL(consulta, listaJuegoSQLite);
+        actualizarJuegosMySQL(consulta, listaJuegoSQLite);
     }
 
     public void actualizarJuegosPostgre(String consulta, List<VideojuegoDAOSQLite> listaJuegoSQLite) {
-        try (Connection conexion = DriverManager.getConnection(URLP, USERP, PASSWORDP); PreparedStatement statement = conexion.prepareStatement(consulta)) {
+        try (Connection conexion = DriverManager.getConnection(URLP); PreparedStatement statement = conexion.prepareStatement(consulta)) {
 
             for (VideojuegoDAOSQLite videojuego : listaJuegoSQLite) {
                 try {
@@ -217,7 +215,7 @@ public class SincronizarDAO {
     }
 
     public void actualizarJuegosMySQL(String consulta, List<VideojuegoDAOSQLite> listaJuegoSQLite) {
-        try (Connection conexion = DriverManager.getConnection(URLM, USERM, PASSWORDM); PreparedStatement statement = conexion.prepareStatement(consulta)) {
+        try (Connection conexion = DriverManager.getConnection(URLM); PreparedStatement statement = conexion.prepareStatement(consulta)) {
 
             for (VideojuegoDAOSQLite videojuego : listaJuegoSQLite) {
                 try {
@@ -247,11 +245,11 @@ public class SincronizarDAO {
 
         actualizarJugadoresNubePostgre(consulta, listJugadoresSQLite);
 
-        //actualizarJugadoresNubeMySQL(consulta, listJugadoresSQLite);
+        actualizarJugadoresNubeMySQL(consulta, listJugadoresSQLite);
     }
 
     public void actualizarJugadoresNubePostgre(String consulta, List<JugadorDAOSQLite> listJugadoresSQLite) {
-        try (Connection conexion = DriverManager.getConnection(URLP, USERP, PASSWORDP); PreparedStatement statement = conexion.prepareStatement(consulta)) {
+        try (Connection conexion = DriverManager.getConnection(URLP); PreparedStatement statement = conexion.prepareStatement(consulta)) {
 
             for (JugadorDAOSQLite jugador : listJugadoresSQLite) {
                 try {
@@ -275,7 +273,7 @@ public class SincronizarDAO {
     }
 
     private void actualizarJugadoresNubeMySQL(String consulta, List<JugadorDAOSQLite> listJugadoresSQLite) {
-        try (Connection conexion = DriverManager.getConnection(URLM, USERM, PASSWORDM); PreparedStatement statement = conexion.prepareStatement(consulta)) {
+        try (Connection conexion = DriverManager.getConnection(URLM); PreparedStatement statement = conexion.prepareStatement(consulta)) {
 
             for (JugadorDAOSQLite jugador : listJugadoresSQLite) {
                 try {

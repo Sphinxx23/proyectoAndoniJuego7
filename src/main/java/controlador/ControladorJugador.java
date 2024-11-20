@@ -99,14 +99,14 @@ public class ControladorJugador {
         }
     }
 
-    public boolean comprobarJugadorDescargado(int idJugadorJuego, int servidorLinea) {
+    public boolean comprobarJugadorDescargado(int idJugadorJuego, String nombreJugador, int servidorLinea) {
         switch (servidorLinea) {
             case 1:
                 //Postgre
-                return jugadorPostgreeSQL.comprobarJugadorDescargado(idJugadorJuego);
+                return jugadorPostgreeSQL.comprobarJugadorDescargado(idJugadorJuego, nombreJugador);
             case 2:
                 //MySQL
-                return jugadorMySQL.comprobarJugadorDescargado(idJugadorJuego);
+                return jugadorMySQL.comprobarJugadorDescargado(idJugadorJuego, nombreJugador);
             default:
                 throw new AssertionError();
         }

@@ -9,30 +9,20 @@ package modelo;
  * @author Vespertino
  */
 public class ConfiguracionJugador {
-    private String control_settings;
     private boolean sound_enabled;
     private String resolution;
     private String language;
 
-    public ConfiguracionJugador(String control_settings, boolean sound_enabled, String resolution, String language) {
-        this.control_settings = control_settings;
+    public ConfiguracionJugador(boolean sound_enabled, String resolution, String language) {
         this.sound_enabled = sound_enabled;
         this.resolution = resolution;
         this.language = language;
     }
 
     public ConfiguracionJugador() {
-        this(null, false, null, null);
+        this(false, null, null);
     }
-
-    public String getControl_settings() {
-        return control_settings;
-    }
-
-    public void setControl_settings(String control_settings) {
-        this.control_settings = control_settings;
-    }
-
+    
     public boolean isSound_enabled() {
         return sound_enabled;
     }

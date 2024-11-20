@@ -4,6 +4,7 @@
  */
 package dao;
 
+import conexJSON.ConexJSON;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -21,9 +22,7 @@ public class JugadorDAOMySQL {
 
     private int user_id, experience, lifeLevel, coins, session_count;
     private String nickName, last_login;
-    private static final String URL = "jdbc:mysql://192.168.153.128:3306/proyectoJuego";
-    private static final String USER = "usuario";
-    private static final String PASSWORD = "Password_1";
+    private static final String URL = ConexJSON.consultarJson("mysql");
 
     public JugadorDAOMySQL(int user_id, int experience, int lifeLevel, int coins, int session_count, String nickName, String last_login) {
         this.user_id = user_id;
@@ -103,31 +102,12 @@ public class JugadorDAOMySQL {
         this.last_login = last_login;
     }
 
-    public static void main(String[] args) {
-        String url = "jdbc:mysql://sql.freedb.tech:3306/freedb_proyectoJueguito";
-        String user = "freedb_Andoni";
-        String password = "P9F#&y63X9PD#hQ";
-
-        String sql = "SELECT * FROM videojuego";
-        try (Connection con = DriverManager.getConnection(url, user, password); PreparedStatement pstmt = con.prepareStatement(sql)) {
-
-            ResultSet rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                System.out.println(rs.getString("isbn"));
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-
-    }
-
     public static List<String> obtenerJugadores() {
         List<String> listaJugadores = new LinkedList<>();
 
         String consulta = "SELECT user_id, nick_name, experience, life_level, coins FROM jugador ORDER BY user_id";
 
-        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
+        try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
 
             while (resultado.next()) {
                 int user_id = resultado.getInt("user_id");
@@ -160,7 +140,7 @@ public class JugadorDAOMySQL {
         // Consulta SQL para verificar si existe un jugador con el nombre proporcionado
         String query = "SELECT COUNT(*) FROM jugador WHERE user_id = ?";
 
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement stmt = conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(URL); PreparedStatement stmt = conn.prepareStatement(query)) {
 
             // Establecer el parámetro en la consulta
             stmt.setInt(1, idJugadorJuego);
@@ -191,7 +171,7 @@ public class JugadorDAOMySQL {
         String consulta = "UPDATE jugador SET experience = experience + ?, life_level = life_level + ?, "
                 + "coins = coins + ?, session_count = session_count + 1, last_login = ? WHERE user_id = ?";
 
-        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(consulta)) {
+        try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta)) {
 
             // Establecer los valores en el PreparedStatement
             statement.setInt(1, experienceN);
@@ -215,7 +195,7 @@ public class JugadorDAOMySQL {
 
         String consulta = "SELECT * FROM jugador";
 
-        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
+        try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
 
             while (resultado.next()) {
                 int user_id = resultado.getInt("user_id");
@@ -238,13 +218,13 @@ public class JugadorDAOMySQL {
         }
     }
 
-    public boolean comprobarJugadorDescargado(int idJugadorJuego) {
-        String urlSQLite = "jdbc:sqlite:G:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
+    public boolean comprobarJugadorDescargado(int idJugadorJuego, String nombreJugador) {
+        String urlSQLite = conexJSON.ConexJSON.consultarJson("sqlite");
 
         try (Connection conn = DriverManager.getConnection(urlSQLite)) {
             conn.setAutoCommit(false); // Desactiva el auto-commit para usar transacciones
 
-            if (isJugadorDescargado(conn, idJugadorJuego)) {
+            if (isJugadorDescargado(conn, idJugadorJuego, nombreJugador)) {
                 return false; // El juego ya está descargado
             }
 
@@ -263,10 +243,11 @@ public class JugadorDAOMySQL {
         }
     }
 
-    private boolean isJugadorDescargado(Connection conn, int idJugadorJuego) throws SQLException {
-        String query = "SELECT COUNT(*) FROM jugador WHERE user_id = ?";
+    private boolean isJugadorDescargado(Connection conn, int idJugadorJuego, String nombreJugador) throws SQLException {
+        String query = "SELECT COUNT(*) FROM jugador WHERE user_id = ? AND nick_name = ?";
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, idJugadorJuego);
+            stmt.setString(2, nombreJugador);
             ResultSet rs = stmt.executeQuery();
             return rs.next() && rs.getInt(1) > 0;
         }
@@ -275,7 +256,7 @@ public class JugadorDAOMySQL {
     private JugadorDAOPostgreeSQL obtenerJugadorID(int idJugadorJuego) {
         String consulta = "SELECT * FROM jugador where user_id = ?";
 
-        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(consulta)) {
+        try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta)) {
 
             statement.setInt(1, idJugadorJuego);
 

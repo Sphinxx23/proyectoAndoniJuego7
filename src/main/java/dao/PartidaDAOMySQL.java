@@ -4,6 +4,7 @@
  */
 package dao;
 
+import conexJSON.ConexJSON;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -15,9 +16,7 @@ import java.time.LocalDateTime;
  * @author andon
  */
 public class PartidaDAOMySQL {
-    private static final String URL = "jdbc:postgresql://ep-broad-union-a29uia00.eu-central-1.aws.neon.tech:5432/proyectoJuego?sslmode=require";
-    private static final String USER = "proyectoJuego_owner";
-    private static final String PASSWORD = "eb4xsQc0ENkU";
+    private static final String URL = ConexJSON.consultarJson("mysql");
     private int user_id, experience, life_level, coins;
     private String isbn;
     private LocalDateTime session_date;
@@ -87,7 +86,7 @@ public class PartidaDAOMySQL {
 
         String sql = "INSERT INTO partida (isbn, user_id, experience, life_level, coins, session_date) VALUES (?, ?, ?, ?, ?, ?)";
 
-        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); 
+        try (Connection conexion = DriverManager.getConnection(URL); 
                 PreparedStatement statement = conexion.prepareStatement(sql)) {
 
             statement.setString(1, partidaDAOMySQL.getIsbn());

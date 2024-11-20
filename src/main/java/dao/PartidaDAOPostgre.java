@@ -4,6 +4,7 @@
  */
 package dao;
 
+import static conexJSON.ConexJSON.consultarJson;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
@@ -16,9 +17,7 @@ import java.util.Random;
  */
 public class PartidaDAOPostgre {
 
-    private static final String URL = "jdbc:postgresql://ep-broad-union-a29uia00.eu-central-1.aws.neon.tech:5432/proyectoJuego?sslmode=require";
-    private static final String USER = "proyectoJuego_owner";
-    private static final String PASSWORD = "eb4xsQc0ENkU";
+    private static final String URL = consultarJson("postgres");
     private int user_id, experience, life_level, coins;
     private String isbn;
     private LocalDateTime session_date;
@@ -107,7 +106,7 @@ public class PartidaDAOPostgre {
 
         String sql = "INSERT INTO partida (isbn, user_id, experience, life_level, coins, session_date) VALUES (?, ?, ?, ?, ?, ?)";
 
-        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); 
+        try (Connection conexion = DriverManager.getConnection(URL); 
                 PreparedStatement statement = conexion.prepareStatement(sql)) {
 
             statement.setString(1, partidaPostgre.getIsbn());

@@ -3,6 +3,7 @@ package vista;
 import controlador.ControladorVideojuegos;
 import controlador.*;
 import java.sql.SQLException;
+import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -64,8 +65,8 @@ public class Vista {
     }
 
     private void menuEnLinea() {
-        int opJugador;
-
+        int opJugador = 0;
+        boolean b;
         do {
             System.out.println("Menu en linea: ");
             System.out.println("####################");
@@ -74,8 +75,16 @@ public class Vista {
             System.out.println("2. Salir");
             System.out.println("####################");
 
-            System.out.print("Indique una opcion: ");
-            opJugador = sc.nextInt();
+            do {
+                System.out.print("Elige una opción: ");
+                try {
+                    opJugador = Integer.parseInt(sc.nextLine());
+                    b = false;
+                } catch (Exception e) {
+                    System.out.println("Caracter invalido.");
+                    b = true;
+                }
+            } while (b);
 
             if (opJugador < 1 || opJugador > 2) {
                 System.out.println("Opcion incorrecta.");
@@ -98,7 +107,7 @@ public class Vista {
     }
 
     private void menuServidores() {
-
+        boolean b;
         do {
             System.out.println("#########################################");
             System.out.println("Elige la forma en la que quieres jugar: ");
@@ -107,9 +116,17 @@ public class Vista {
             System.out.println("3. Salir de la aplicacion.");
             System.out.println("#########################################");
             System.out.println();
-            System.out.print("Indique la opcion: ");
 
-            opJuegosConex = sc.nextInt();
+            do {
+                System.out.print("Elige una opcion: ");
+                try {
+                    opJuegosConex = Integer.parseInt(sc.nextLine());
+                    b = false;
+                } catch (Exception e) {
+                    System.out.println("Caracter invalido.");
+                    b = true;
+                }
+            } while (b);
 
             if (opJuegosConex < 1 || opJuegosConex > 3) {
                 System.out.println("Opcion incorrecta.");
@@ -144,7 +161,7 @@ public class Vista {
     private void menuConfiguracion() {
         Scanner sc = new Scanner(System.in);
         String respuesta;
-        
+
         controlConfig.mostrarConfiguracion();
 
         do {
@@ -165,12 +182,13 @@ public class Vista {
 
     private void cambiarConfiguracion() throws AssertionError {
         String confSonido, confResolucion, confLenguaje;
-        int opConfLenguaje;
+        Scanner sc = new Scanner(System.in);
+        int opConfLenguaje = 0;
+        boolean b;
         System.out.println("###############################");
         System.out.println("Cambio de configuraciones...");
         System.out.println("###############################");
         System.out.println();
-        sc.nextLine();
         System.out.print("¿Desea activar el sonido de los juegos? Si / No: ");
         do {
             confSonido = sc.nextLine();
@@ -190,8 +208,16 @@ public class Vista {
             System.out.println("###################");
             System.out.println();
 
-            System.out.print("Indique la opción: ");
-            opConfLenguaje = sc.nextInt();
+            do {
+                System.out.print("Elige una opcion: ");
+                try {
+                    opConfLenguaje = Integer.parseInt(sc.nextLine());
+                    b = false;
+                } catch (Exception e) {
+                    System.out.println("Caracter invalido.");
+                    b = true;
+                }
+            } while (b);
 
             if (opConfLenguaje < 1 || opConfLenguaje > 2) {
                 System.out.println("Opcion incorrecta.");
@@ -213,7 +239,8 @@ public class Vista {
     }
 
     private void menuSinConexion() {
-        int opJugador;
+        int opJugador = 0;
+        boolean b;
 
         do {
             System.out.println("Menu sin conexion:");
@@ -225,8 +252,16 @@ public class Vista {
             System.out.println("4. Salir");
             System.out.println("####################");
 
-            System.out.print("Indique una opcion: ");
-            opJugador = sc.nextInt();
+            do {
+                System.out.print("Elige una opcion: ");
+                try {
+                    opJugador = Integer.parseInt(sc.nextLine());
+                    b = false;
+                } catch (Exception e) {
+                    System.out.println("Caracter invalido.");
+                    b = true;
+                }
+            } while (b);
 
             if (opJugador < 1 || opJugador > 4) {
                 System.out.println("Opcion incorrecta.");
@@ -250,6 +285,7 @@ public class Vista {
                 } else {
                     System.out.println("No se han podido guardar los cambios.");
                 }
+                menuSinConexion();
                 break;
             case 4:
                 vaciarPantalla();
@@ -303,27 +339,45 @@ public class Vista {
     }
 
     private void eligeServidorLinea() {
+        boolean b;
 
         do {
             System.out.println("####################");
             System.out.println("Elige el servidor:");
             System.out.println("1. PostgreSQL");
             System.out.println("2. MySQL");
+            System.out.println("0. Salir");
             System.out.println("####################");
 
-            servidorLinea = sc.nextInt();
+            do {
+                System.out.print("Elige una opción: ");
+                try {
+                    servidorLinea = Integer.parseInt(sc.nextLine());
+                    b = false;
+                } catch (Exception e) {
+                    System.out.println("Caracter invalido.");
+                    b = true;
+                }
+            } while (b);
 
-            if (servidorLinea < 1 || servidorLinea > 2) {
+            if (servidorLinea < 0 || servidorLinea > 2) {
                 System.out.println("Opcion incorrecta.");
                 System.out.println();
             }
+
+            if (servidorLinea == 0) {
+                vaciarPantalla();
+                menuServidores();
+            }
+
         } while (servidorLinea < 1 || servidorLinea > 2);
 
     }
 
     private void eligeJugador() {
         Scanner sc = new Scanner(System.in);
-        boolean existeJugador, jugadorSinDescargar;
+        boolean existeJugador, jugadorSinDescargar, b;
+        int idJugadorJuego = 0;
         String nombreJugador = "";
         List<String> listaJugadores = new LinkedList();
 
@@ -332,8 +386,15 @@ public class Vista {
         if (mostrarJugadores(listaJugadores)) {
             do {
 
-                System.out.print("Escribe el id del jugador que quieres usar: ");
-                int idJugadorJuego = sc.nextInt();
+                do {
+                    System.out.print("Escribe el id del jugador que quieres usar: ");
+                    try {
+                        idJugadorJuego = Integer.parseInt(sc.nextLine());
+                        b = false;
+                    } catch (Exception e) {
+                        b = true;
+                    }
+                } while (b);
 
                 if (servidorLinea == 3) {
                     System.out.print("Para asegurar, escribe el nombre de usuario: ");
@@ -344,10 +405,12 @@ public class Vista {
                 existeJugador = comprobarJugador(idJugadorJuego, nombreJugador);
 
                 if (servidorLinea != 3) {
-                    jugadorSinDescargar = comprobarJugadorSinDescargar(idJugadorJuego);
+                    if (existeJugador) {
+                        jugadorSinDescargar = comprobarJugadorSinDescargar(idJugadorJuego, nombreJugador);
 
-                    if (jugadorSinDescargar) {
-                        System.out.println("El jugador ha sido descargado en la base de datos local.");
+                        if (jugadorSinDescargar) {
+                            System.out.println("El jugador ha sido descargado en la base de datos local.");
+                        }
                     }
                 }
 
@@ -461,10 +524,12 @@ public class Vista {
             }
 
             if (servidorLinea != 3) {
-                juegoSinDescargar = comprobarJuegoSinDescargar(isbnJuego);
+                if (existeJuego) {
+                    juegoSinDescargar = comprobarJuegoSinDescargar(isbnJuego, nombreJuego);
 
-                if (juegoSinDescargar) {
-                    System.out.println("El juego ha sido instalado.");
+                    if (juegoSinDescargar) {
+                        System.out.println("El juego ha sido instalado.");
+                    }
                 }
             }
 
@@ -599,8 +664,8 @@ public class Vista {
         return controlJuegos.comprobarJuego(isbnJuego, nombreJuego, servidorLinea);
     }
 
-    private boolean comprobarJuegoSinDescargar(String isbnJuego) {
-        return controlJuegos.comprobarJuegoSinDescargar(isbnJuego, servidorLinea);
+    private boolean comprobarJuegoSinDescargar(String isbnJuego, String nombreJuego) {
+        return controlJuegos.comprobarJuegoSinDescargar(isbnJuego, nombreJuego, servidorLinea);
     }
 
     private boolean sincronizacionBasesNubeALocal() throws ClassNotFoundException {
@@ -611,8 +676,8 @@ public class Vista {
         }
     }
 
-    private boolean comprobarJugadorSinDescargar(int idJugadorJuego) {
-        return controlJugador.comprobarJugadorDescargado(idJugadorJuego, servidorLinea);
+    private boolean comprobarJugadorSinDescargar(int idJugadorJuego, String nombreJugador) {
+        return controlJugador.comprobarJugadorDescargado(idJugadorJuego, nombreJugador, servidorLinea);
     }
 
     private boolean guardarCambiosLocalANube() {

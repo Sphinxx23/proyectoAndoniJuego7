@@ -4,6 +4,7 @@
  */
 package dao;
 
+import static conexJSON.ConexJSON.consultarJson;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
@@ -15,9 +16,7 @@ import java.util.List;
  */
 public class JugadorDAOPostgreeSQL {
 
-    private static final String URL = "jdbc:postgresql://ep-broad-union-a29uia00.eu-central-1.aws.neon.tech:5432/proyectoJuego?sslmode=require";
-    private static final String USER = "proyectoJuego_owner";
-    private static final String PASSWORD = "eb4xsQc0ENkU";
+    private static final String URL = consultarJson("postgres");
     private int user_id, experience, lifeLevel, coins, session_count;
     private String nickName, last_login;
 
@@ -104,7 +103,7 @@ public class JugadorDAOPostgreeSQL {
 
         String consulta = "SELECT user_id, nick_name, experience, life_level, coins FROM jugador ORDER BY user_id";
 
-        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
+        try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
 
             while (resultado.next()) {
                 int user_id = resultado.getInt("user_id");
@@ -132,7 +131,7 @@ public class JugadorDAOPostgreeSQL {
 
         String consulta = "SELECT * FROM jugador";
 
-        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
+        try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta); ResultSet resultado = statement.executeQuery()) {
 
             while (resultado.next()) {
                 int user_id = resultado.getInt("user_id");
@@ -164,7 +163,7 @@ public class JugadorDAOPostgreeSQL {
         // Consulta SQL para verificar si existe un jugador con el nombre proporcionado
         String query = "SELECT COUNT(*) FROM jugador WHERE user_id = ?";
 
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement stmt = conn.prepareStatement(query)) {
+        try (Connection conn = DriverManager.getConnection(URL); PreparedStatement stmt = conn.prepareStatement(query)) {
 
             // Establecer el parámetro en la consulta
             stmt.setInt(1, idJugadorJuego);
@@ -195,7 +194,7 @@ public class JugadorDAOPostgreeSQL {
         String consulta = "UPDATE jugador SET experience = experience + ?, life_level = life_level + ?, "
                 + "coins = coins + ?, session_count = session_count + 1, last_login = ? WHERE user_id = ?";
 
-        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(consulta)) {
+        try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta)) {
 
             // Establecer los valores en el PreparedStatement
             statement.setInt(1, experienceN);
@@ -214,13 +213,13 @@ public class JugadorDAOPostgreeSQL {
         }
     }
 
-    public boolean comprobarJugadorDescargado(int idJugadorJuego) {
-        String urlSQLite = "jdbc:sqlite:G:\\2º Superior\\Acceso a datos\\SQLite\\datosLocales.db";
+    public boolean comprobarJugadorDescargado(int idJugadorJuego, String nombreJugador) {
+        String urlSQLite = consultarJson("sqlite");
 
         try (Connection conn = DriverManager.getConnection(urlSQLite)) {
             conn.setAutoCommit(false); // Desactiva el auto-commit para usar transacciones
 
-            if (isJugadorDescargado(conn, idJugadorJuego)) {
+            if (isJugadorDescargado(conn, idJugadorJuego, nombreJugador)) {
                 return false; // El juego ya está descargado
             }
 
@@ -240,10 +239,11 @@ public class JugadorDAOPostgreeSQL {
         }
     }
 
-    private boolean isJugadorDescargado(Connection conn, int idJugadorJuego) throws SQLException {
-        String query = "SELECT COUNT(*) FROM jugador WHERE user_id = ?";
+    private boolean isJugadorDescargado(Connection conn, int idJugadorJuego, String nombreJugador) throws SQLException {
+        String query = "SELECT COUNT(*) FROM jugador WHERE user_id = ? AND nick_name = ?";
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, idJugadorJuego);
+            stmt.setString(2, nombreJugador);
             ResultSet rs = stmt.executeQuery();
             return rs.next() && rs.getInt(1) > 0;
         }
@@ -252,7 +252,7 @@ public class JugadorDAOPostgreeSQL {
     private JugadorDAOPostgreeSQL obtenerJugadorID(int idJugadorJuego) {
         String consulta = "SELECT * FROM jugador where user_id = ?";
 
-        try (Connection conexion = DriverManager.getConnection(URL, USER, PASSWORD); PreparedStatement statement = conexion.prepareStatement(consulta)) {
+        try (Connection conexion = DriverManager.getConnection(URL); PreparedStatement statement = conexion.prepareStatement(consulta)) {
 
             statement.setInt(1, idJugadorJuego);
 
